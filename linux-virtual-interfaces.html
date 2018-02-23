@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
         <meta charset="utf-8" />
-        <title>Abhijit's Blog</title>
+        <title>Linux Virtual Interfaces</title>
         <link rel="stylesheet" href="/theme/css/main.css" />
 
         <!--[if IE]>
@@ -14,13 +14,18 @@
         <header id="banner" class="body">
                 <h1><a href="/">Abhijit's Blog </a></h1>
                 <nav><ul>
-                    <li><a href="/category/2018.html">2018</a></li>
+                    <li class="active"><a href="/category/2018.html">2018</a></li>
                 </ul></nav>
         </header><!-- /#banner -->
+<section id="content" class="body">
+  <article>
+    <header>
+      <h1 class="entry-title">
+        <a href="/linux-virtual-interfaces.html" rel="bookmark"
+           title="Permalink to Linux Virtual Interfaces">Linux Virtual Interfaces</a></h1>
+    </header>
 
-            <aside id="featured" class="body">
-                <article>
-                    <h1 class="entry-title"><a href="/linux-virtual-interfaces.html">Linux Virtual Interfaces</a></h1>
+    <div class="entry-content">
 <footer class="post-info">
         <abbr class="published" title="2018-02-23T00:00:00+05:30">
                 Published: Fri 23 February 2018
@@ -31,7 +36,7 @@
         </address>
 <p>In <a href="/category/2018.html">2018</a>.</p>
 <p>tags: <a href="/tag/pelican.html">pelican</a> </p>
-</footer><!-- /.post-info --><h2>Background</h2>
+</footer><!-- /.post-info -->      <h2>Background</h2>
 <p>Virtual interfaces in Linux are often used to provide networking to Containers and Virtual Machines. This is typically achieved by creating a virtual interface, assigning it to a VM/Container, connecting it to a bridge and in turn connecting it to a physical interface if required. Typically network namespaces are used to provide isolation between the VMs/Containers.
  While there's enough documentation around net, but there are subtleties.</p>
 <h2><code>veth</code> Virtual Interface</h2>
@@ -181,8 +186,11 @@ listening on veth0, link-type EN10MB (Ethernet), capture size 262144 bytes
 </ol>
 <h2><code>tun/tap</code> Virtual Interface</h2>
 <p>Mainly <code>tun</code> and <code>tap</code> interfaces are used to inject IP packets to/from kernel from userspace. The way this typically works is a <code>/dev</code> entry is created when a process binds to an interface and process can simply <code>read/write</code> from the <code>/dev/</code> for the packet transfer. A more detailed look at how tun/tap interfaces work is given in <a href="http://backreference.org/2010/03/26/tuntap-interface-tutorial/">this link</a> and it is worth following that for details. <code>tap</code> interfaces are typically used by Virtual Machines, where full Layer 2 headers are also used. For other applications like <code>openvpn</code>, typically make use of <code>tun</code> interface type.</p>
-<p>To be able to use <code>tap</code> interface, one has to bind to the tap interface. The link above shows one example or a similar example from <code>qemu</code> source is <a href="https://github.com/qemu/qemu/blob/08a63553161d9d12fba217f07af49f986b487e9a/net/tap-linux.c#L41">availble here</a></p>                </article>
-            </aside><!-- /#featured -->
+<p>To be able to use <code>tap</code> interface, one has to bind to the tap interface. The link above shows one example or a similar example from <code>qemu</code> source is <a href="https://github.com/qemu/qemu/blob/08a63553161d9d12fba217f07af49f986b487e9a/net/tap-linux.c#L41">availble here</a></p>
+    </div><!-- /.entry-content -->
+
+  </article>
+</section>
         <section id="extras" class="body">
                 <div class="blogroll">
                         <h2>links</h2>
