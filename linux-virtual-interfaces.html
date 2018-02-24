@@ -187,6 +187,18 @@ listening on veth0, link-type EN10MB (Ethernet), capture size 262144 bytes
 <h2><code>tun/tap</code> Virtual Interface</h2>
 <p>Mainly <code>tun</code> and <code>tap</code> interfaces are used to inject IP packets to/from kernel from userspace. The way this typically works is a <code>/dev</code> entry is created when a process binds to an interface and process can simply <code>read/write</code> from the <code>/dev/</code> for the packet transfer. A more detailed look at how tun/tap interfaces work is given in <a href="http://backreference.org/2010/03/26/tuntap-interface-tutorial/">this link</a> and it is worth following that for details. <code>tap</code> interfaces are typically used by Virtual Machines, where full Layer 2 headers are also used. For other applications like <code>openvpn</code>, typically make use of <code>tun</code> interface type.</p>
 <p>To be able to use <code>tap</code> interface, one has to bind to the tap interface. The link above shows one example or a similar example from <code>qemu</code> source is <a href="https://github.com/qemu/qemu/blob/08a63553161d9d12fba217f07af49f986b487e9a/net/tap-linux.c#L41">availble here</a></p>
+<h2>References</h2>
+<p>Following is a list of links on the web that I referred to while experimenting with Virtual Interfaces.</p>
+<ol>
+<li><a href="">http://www.naturalborncoder.com/virtualization/2014/10/17/understanding-tun-tap-interfaces/</a></li>
+<li><a href="">https://lists.linuxfoundation.org/pipermail/bridge/2011-June/007711.html</a></li>
+<li><a href="">https://stackoverflow.com/questions/25641630/virtual-networking-devices-in-linux#34773334</a></li>
+<li><a href="">http://www.opencloudblog.com/?p=66</a></li>
+<li><a href="">https://unix.stackexchange.com/questions/122468/how-does-one-capture-traffic-on-virtual-interfaces</a></li>
+<li><a href="">https://serverfault.com/questions/585246/network-level-of-veth-doesnt-respond-to-arp?newreg=fa2af6ce40ad43318ac4b32054741cd7</a></li>
+<li><a href="">http://backreference.org/2013/06/20/some-notes-on-veth-interfaces/</a></li>
+<li><a href="">https://serverfault.com/questions/743466/tcpdump-on-bridge-interface-virbr-does-not-receive-any-packets-destined-for-on</a></li>
+</ol>
     </div><!-- /.entry-content -->
 
   </article>
