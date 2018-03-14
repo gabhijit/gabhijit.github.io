@@ -51,55 +51,21 @@
     <div class="row">
 
         <div class="span9">
-        
 
-        
 
 
     <div class='article'>
-        <div class="content-title">
-            <a href="/linux-vrf-mpls.html"><h1>Linux VRF with MPLS for L3-VPN</h1></a>
-27/02/2018
+        <a href="/linux-vrf-mpls.html"><h2>Linux VRF with MPLS for L3-VPN</h2></a>
+        <div class= "well small"> 27/02/2018
 
 by <a class="url fn" href="/author/abhijit-gadgil.html">Abhijit Gadgil</a>
  
 
 
- 
-        </div>
-        
-        <div><h2>VRF Background</h2>
-<p>Typically VRF is used in VPN implementations, where it is possible to have overlapping address-spaces between one or more customers, in such situations, the isolation required between customers is achieved using VRF. This can as well be achieved using VRF. This is explained in excellent details in <a href="https://cumulusnetworks.com/blog/vrf-for-linux/">this blog post by cumulus networks</a>.</p>
-<h2>Re-producing Setup</h2>
-<p>One of the use-cases for VRF presented during <a href="">netdev 1.1</a> was using VRFs with MPLS feature (also from Cumulus Networks). One of the things that I wanted to be able to do this is - to re-create the setup, so that it works on any Linux with kernel having the supported features. This exercise turned out to be slightly more involved than I thought before.</p>
-<h3>The Topology</h3>
-<p>This setup is explained in the <a href="https://www.netdevconf.org/1.1/proceedings/slides/ahern-vrf-tutorial.pdf">document</a>.</p>
-<p>Here is how it is done -</p>
-<p>Each of the device (Host, CE, PE or P) lives in it's own <code>netns</code>. <code>veth</code> and <code>bridge</code> links are used as appropriate to connect the hosts (making sure also that their end-points are in the right <code>netns</code>. Linux implementation of <code>vrf</code> is a <code>netdevice</code>. So one VRF <code>netdevice</code> is created for each of the customer in the same PE router, thus there are two VRF <code>netdevice</code>s in the PE router. The physical devices (<code>veth</code> endpoints) that connect to the customer edge router (CE Router) are enslaved to the VRF <code>netdevice</code> corresponding to that customer. For each of the VRF <code>netdevice</code>, there's a separate routing table setup for lookup and corresponding <code>l3mdev</code> rules are added for making sure the packet lookup happens in the correct routing table.</p>
-<h2>Issues / Problems faced</h2>
-<p>While setting up most of the things was relatively easier, there were a few gotchas</p>
-<ol>
-<li>It was not obvious, but MPLS labels can be setup only in the main routing table (so specifying table parameter throws <code>EINVAL</code> and as with many <code>RTNETLINK</code> errors, this one is a bit hard to figure out. Just figured this out by reading the appropriate code.</li>
-<li>Unless you actually setup using <code>sysctl -w net.mpls.platform_labels=10000</code>, setting up label values throws an <code>EINVAL</code> error, so one has to first set this up.</li>
-<li>The way I was going about creating most of the interfaces was, I was first creating an interface in the default namespace and then assigning the <code>netns</code> using <code>ip link set &lt;dev&gt; netns &lt;nsname&gt;</code>. While this works for <code>veth</code> devices, this doesn't work for VRF devices. My first impression was that setting VRF in a non-default <code>netns</code> is not allowed, while that is not the case, moving VRF from one netns to another is not allowed. So the best way to go about creating that is - to actually create the VRF device in the correct <code>netns</code> first time itself.</li>
-<li>Faced a weird issue - while the setup looked all fine, was not able to ping from the hosts across MPLS network. The packets were not getting forwarded on one of the PE routers. A debugging using <code>tcpdump</code> showed that while the route was properly setup, the packets didn't show up on the corresponding interface. Actually, Dave Ahern of Cumulus who had given the tutorial above helped in solving this issue by basically asking to trace fib events <code>perf record -efib:*</code> and then <code>perf script</code>. The lookup was working fine but what was observed was <code>fib_validate_source</code> was failing. This was because the VRF routing table didn't have a default route (which is always recommended) and it didn't have a route to the source subnet. Due to absence of this route, the source was treated as <code>martian</code>, which was later verified using <code>sysctl -w net.ipv4.conf.all.log_martian=1</code>. Finally after adding the route to the source subnet the issue was resolved.</li>
-<li>After all the above issues were resolved a rather odd issue showed up, while it was possible to ping across hosts, it was not possible to ping the host itself. This is because, when we create a <code>netns</code>, the loopback interface <code>lo</code> in that network interface is not set as up by default. This is fixed by setting <code>ip netns exec netnsname ip link setup lo up</code>.</li>
-</ol>
-<h2>Demo</h2>
-<p>Following <a href="https://github.com/gabhijit/networking-experiments">github repository</a> has complete setup.</p>
-<h2>References</h2>
-<p>Some references used for this experiment -</p>
-<ol>
-<li><a href="https://www.netdevconf.org/1.1/proceedings/slides/ahern-vrf-tutorial.pdf">Tutorial PDF</a></li>
-<li><a href="https://www.youtube.com/watch?v=zxPFFdRN_x4">Tutorial Video</a> - See VRF with MPLS use-case</li>
-<li>Stack-Exchange discussion related to <a href="https://unix.stackexchange.com/questions/401719/rtnetlink-answers-invalid-argument-mpls-on-mininet">MPLS labels</a></li>
-</ol>
-<h2>Next steps</h2>
-<p>While the script is fairly well organized, this is still very hard-coded for the above setup and totally inflexible. A better idea would be to make a small tool which can read topology and create setups easily. For example, something like a dot file reader that generates a yaml and a python script that generates topology using this YAML file.</p>
-<p>Also, this is a very static setup. Next step would be to run a routing daemon like <a href="">bird</a> and try similar setup.</p></div>
-        <hr />
+ </div>
+        <div class="summary"><p>VRF support for Linux was added in kernel 4.5. In the Linux netdev 1.1 conference, there was a talk about this support, which showed one of the use-case as MPLS-VPN. This blog post tries to re-create the setup from demo on a kernel 4.15.</p> <a class="btn btn-info xsmall" href="/linux-vrf-mpls.html">read more</a></div>
     </div>
-		
+
 <div class="pagination">
 <ul>
     <li class="prev disabled"><a href="#">&larr; Previous</a></li>
@@ -138,7 +104,6 @@ by <a class="url fn" href="/author/abhijit-gadgil.html">Abhijit Gadgil</a>
                 Categories
                 </li>
                 
-                <li><a href="/category/2018.html">2018</a></li>
                 <li><a href="/category/linux-networking.html">Linux Networking</a></li>
                    
             </ul>
