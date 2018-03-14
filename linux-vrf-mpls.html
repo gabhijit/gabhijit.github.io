@@ -1,42 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-        <meta charset="utf-8" />
-        <title>Linux VRF with MPLS for L3-VPN</title>
-        <link rel="stylesheet" href="/theme/css/main.css" />
+    <meta charset="utf-8">
+    <title>Abhijit's Blog - Linux VRF with MPLS for L3-VPN</title>
+    <meta name="description" content="">
+    <meta name="author" content="Abhijit Gadgil">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <!--[if IE]>
-            <script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-        <![endif]-->
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+    <script src="/theme/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/theme/bootstrap.min.css" rel="stylesheet">
+    <link href="/theme/bootstrap.min.responsive.css" rel="stylesheet">
+    <link href="/theme/local.css" rel="stylesheet">
+    <link href="/theme/pygments.css" rel="stylesheet">
+
+    <!-- So Firefox can bookmark->"abo this site" -->
+
 </head>
 
-<body id="index" class="home">
-        <header id="banner" class="body">
-                <h1><a href="/">Abhijit's Blog </a></h1>
-                <nav><ul>
-                    <li class="active"><a href="/category/2018.html">2018</a></li>
-                </ul></nav>
-        </header><!-- /#banner -->
-<section id="content" class="body">
-  <article>
-    <header>
-      <h1 class="entry-title">
-        <a href="/linux-vrf-mpls.html" rel="bookmark"
-           title="Permalink to Linux VRF with MPLS for L3-VPN">Linux VRF with MPLS for L3-VPN</a></h1>
-    </header>
+<body>
 
-    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2018-02-27T00:00:00+05:30">
-                Published: Tue 27 February 2018
-        </abbr>
+<div class="navbar">
+    <div class="navbar-inner">
+    <div class="container">
 
-        <address class="vcard author">
-                By                         <a class="url fn" href="/author/abhijit-gadgil.html">Abhijit Gadgil</a>
-        </address>
-<p>In <a href="/category/2018.html">2018</a>.</p>
-<p>tags: <a href="/tag/linux-networking.html">Linux-networking</a> <a href="/tag/vrf.html">VRF</a> <a href="/tag/mpls.html">MPLS</a> </p>
-</footer><!-- /.post-info -->      <h2>VRF Background</h2>
+         <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+             <span class="icon-bar"></span>
+             <span class="icon-bar"></span>
+             <span class="icon-bar"></span>
+         </a>
+
+        <a class="brand" href="">Abhijit's Blog</a>
+
+        <div class="nav-collapse">
+        <ul class="nav">
+            
+        </ul>
+        </div>
+        
+    </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="content">
+    <div class="row">
+
+        <div class="span9">
+    <div class='article'>
+        <div class="content-title">
+            <h1>Linux VRF with MPLS for L3-VPN</h1>
+27/02/2018
+
+by <a class="url fn" href="/author/abhijit-gadgil.html">Abhijit Gadgil</a>
+ 
+
+
+        </div>
+	
+        <div><h2>VRF Background</h2>
 <p>Typically VRF is used in VPN implementations, where it is possible to have overlapping address-spaces between one or more customers, in such situations, the isolation required between customers is achieved using VRF. This can as well be achieved using VRF. This is explained in excellent details in <a href="https://cumulusnetworks.com/blog/vrf-for-linux/">this blog post by cumulus networks</a>.</p>
 <h2>Re-producing Setup</h2>
 <p>One of the use-cases for VRF presented during <a href="">netdev 1.1</a> was using VRFs with MPLS feature (also from Cumulus Networks). One of the things that I wanted to be able to do this is - to re-create the setup, so that it works on any Linux with kernel having the supported features. This exercise turned out to be slightly more involved than I thought before.</p>
@@ -64,37 +90,94 @@
 </ol>
 <h2>Next steps</h2>
 <p>While the script is fairly well organized, this is still very hard-coded for the above setup and totally inflexible. A better idea would be to make a small tool which can read topology and create setups easily. For example, something like a dot file reader that generates a yaml and a python script that generates topology using this YAML file.</p>
-    </div><!-- /.entry-content -->
+<p>Also, this is a very static setup. Next step would be to run a routing daemon like <a href="">bird</a> and try similar setup.</p></div>
+	
+        <hr>
 
-  </article>
-</section>
-        <section id="extras" class="body">
-                <div class="blogroll">
-                        <h2>links</h2>
-                        <ul>
-                            <li><a href="http://getpelican.com/">Pelican</a></li>
-                            <li><a href="http://python.org/">Python.org</a></li>
-                            <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
-                            <li><a href="#">You can modify those links in your config file</a></li>
-                        </ul>
-                </div><!-- /.blogroll -->
-                <div class="social">
-                        <h2>social</h2>
-                        <ul>
+        <h2>Comments</h2>
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'gabhijit-github-io'; 
+    var disqus_title = 'Linux VRF with MPLS for L3-VPN';
 
-                            <li><a href="#">You can add links in your config file</a></li>
-                            <li><a href="#">Another social link</a></li>
-                        </ul>
-                </div><!-- /.social -->
-        </section><!-- /#extras -->
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+        </div>
+        
+        <div class="span3">
 
-        <footer id="contentinfo" class="body">
-                <address id="about" class="vcard body">
-                Proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
-                </address><!-- /#about -->
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header"> 
+                Site
+                </li>
+            
+                <li><a href="/archives.html">Archives</a>
+                <li><a href="/tags.html">Tags</a>
 
-                <p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
-        </footer><!-- /#contentinfo -->
 
+
+
+            </ul>
+            </div>
+
+
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header"> 
+                Categories
+                </li>
+                
+                <li><a href="/category/2018.html">2018</a></li>
+                <li><a href="/category/linux-networking.html">Linux Networking</a></li>
+                   
+            </ul>
+            </div>
+
+
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header"> 
+                Links
+                </li>
+            
+                <li><a href="http://getpelican.com/">Pelican</a></li>
+                <li><a href="http://python.org/">Python.org</a></li>
+                <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+                <li><a href="#">You can modify those links in your config file</a></li>
+            </ul>
+            </div>
+
+
+            <div class="social">
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header"> 
+                Social
+                </li>
+           
+                <li><a href="https://github.com/gabhijit">Github</a></li>
+                <li><a href="https://www.linkedin.com/in/amgadgil/">LinkedIn</a></li>
+            </ul>
+            </div>
+            </div>
+
+        </div>  
+    </div>     </div> 
+<footer>
+<br />
+<p><a href="">Abhijit's Blog</a> &copy; Abhijit Gadgil 2018</p>
+</footer>
+
+</div> <!-- /container -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="/theme/bootstrap-collapse.js"></script>
+ 
 </body>
 </html>

@@ -1,120 +1,321 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-        <meta charset="utf-8" />
-        <title>Abhijit's Blog - 2018</title>
-        <link rel="stylesheet" href="/theme/css/main.css" />
+    <meta charset="utf-8">
+    <title>Abhijit's Blog - 2018</title>
+    <meta name="description" content="">
+    <meta name="author" content="Abhijit Gadgil">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <!--[if IE]>
-            <script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-        <![endif]-->
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+    <script src="/theme/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/theme/bootstrap.min.css" rel="stylesheet">
+    <link href="/theme/bootstrap.min.responsive.css" rel="stylesheet">
+    <link href="/theme/local.css" rel="stylesheet">
+    <link href="/theme/pygments.css" rel="stylesheet">
+
+    <!-- So Firefox can bookmark->"abo this site" -->
+
 </head>
 
-<body id="index" class="home">
-        <header id="banner" class="body">
-                <h1><a href="/">Abhijit's Blog </a></h1>
-                <nav><ul>
-                    <li class="active"><a href="/category/2018.html">2018</a></li>
-                </ul></nav>
-        </header><!-- /#banner -->
+<body>
 
-            <aside id="featured" class="body">
-                <article>
-                    <h1 class="entry-title"><a href="/linux-vrf-mpls.html">Linux VRF with MPLS for L3-VPN</a></h1>
-<footer class="post-info">
-        <abbr class="published" title="2018-02-27T00:00:00+05:30">
-                Published: Tue 27 February 2018
-        </abbr>
+<div class="navbar">
+    <div class="navbar-inner">
+    <div class="container">
 
-        <address class="vcard author">
-                By                         <a class="url fn" href="/author/abhijit-gadgil.html">Abhijit Gadgil</a>
-        </address>
-<p>In <a href="/category/2018.html">2018</a>.</p>
-<p>tags: <a href="/tag/linux-networking.html">Linux-networking</a> <a href="/tag/vrf.html">VRF</a> <a href="/tag/mpls.html">MPLS</a> </p>
-</footer><!-- /.post-info --><h2>VRF Background</h2>
-<p>Typically VRF is used in VPN implementations, where it is possible to have overlapping address-spaces between one or more customers, in such situations, the isolation required between customers is achieved using VRF. This can as well be achieved using VRF. This is explained in excellent details in <a href="https://cumulusnetworks.com/blog/vrf-for-linux/">this blog post by cumulus networks</a>.</p>
-<h2>Re-producing Setup</h2>
-<p>One of the use-cases for VRF presented during <a href="">netdev 1.1</a> was using VRFs with MPLS feature (also from Cumulus Networks). One of the things that I wanted to be able to do this is - to re-create the setup, so that it works on any Linux with kernel having the supported features. This exercise turned out to be slightly more involved than I thought before.</p>
-<h3>The Topology</h3>
-<p>This setup is explained in the <a href="https://www.netdevconf.org/1.1/proceedings/slides/ahern-vrf-tutorial.pdf">document</a>.</p>
-<p>Here is how it is done -</p>
-<p>Each of the device (Host, CE, PE or P) lives in it's own <code>netns</code>. <code>veth</code> and <code>bridge</code> links are used as appropriate to connect the hosts (making sure also that their end-points are in the right <code>netns</code>. Linux implementation of <code>vrf</code> is a <code>netdevice</code>. So one VRF <code>netdevice</code> is created for each of the customer in the same PE router, thus there are two VRF <code>netdevice</code>s in the PE router. The physical devices (<code>veth</code> endpoints) that connect to the customer edge router (CE Router) are enslaved to the VRF <code>netdevice</code> corresponding to that customer. For each of the VRF <code>netdevice</code>, there's a separate routing table setup for lookup and corresponding <code>l3mdev</code> rules are added for making sure the packet lookup happens in the correct routing table.</p>
-<h2>Issues / Problems faced</h2>
-<p>While setting up most of the things was relatively easier, there were a few gotchas</p>
+         <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+             <span class="icon-bar"></span>
+             <span class="icon-bar"></span>
+             <span class="icon-bar"></span>
+         </a>
+
+        <a class="brand" href="">Abhijit's Blog</a>
+
+        <div class="nav-collapse">
+        <ul class="nav">
+            
+        </ul>
+        </div>
+        
+    </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="content">
+    <div class="row">
+
+        <div class="span9">
+        
+
+        
+
+
+    <div class='article'>
+        <div class="content-title">
+            <a href="/linux-virtual-interfaces.html"><h1>Linux Virtual Interfaces</h1></a>
+23/02/2018
+
+by <a class="url fn" href="/author/abhijit-gadgil.html">Abhijit Gadgil</a>
+ 
+
+
+ 
+        </div>
+        
+        <div><h2>Background</h2>
+<p>Virtual interfaces in Linux are often used to provide networking to Containers and Virtual Machines. This is typically achieved by creating a virtual interface, assigning it to a VM/Container, connecting it to a bridge and in turn connecting it to a physical interface if required. Typically network namespaces are used to provide isolation between the VMs/Containers.
+ While there's enough documentation around net, but there are subtleties.</p>
+<h2><code>veth</code> Virtual Interface</h2>
+<p>This is a simple Ethernet interface that is always created as a pair of Ethernet interfaces, so the idea here is very simple, packets sent on one of the pair are received on other and vice versa. A typical use-case for this is to establish connectivity between different namespaces or connecting a network namespace outside the host through a bridge. Some interesting observations here -</p>
+<p>If we create a <code>veth</code> pair and keep both ends in the same network namespace and try to ping from one side to another ping works fine, but we don't see any packets on either of the interfaces, which is kind of surprising. The reason this happens is - any address assigned to Linux machine (to any interface) gets assigned to a local table and in the case of 'ping' above, since both the interfaces are in the same namespace (and hence same local table), the packets don't flow through the <code>veth</code>s but through <code>lo</code> interface.</p>
+<div class="highlight"><pre><span></span># create veth pair and assing IP address.
+
+ip link add veth0 type veth peer name veth1
+ip addr add 10.1.0.1/24 dev veth0
+ip addr add 10.1.0.2/24 dev veth1
+
+ping 10.1.0.2 -I 10.1.0.1
+
+PING 10.1.0.2 (10.1.0.2) from 10.1.0.1 : 56(84) bytes of data.
+64 bytes from 10.1.0.2: icmp_seq=1 ttl=64 time=0.041 ms
+64 bytes from 10.1.0.2: icmp_seq=2 ttl=64 time=0.043 ms
+64 bytes from 10.1.0.2: icmp_seq=3 ttl=64 time=0.040 ms
+
+# list all interfaces
+
+ip link
+
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+2: enp3s0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc pfifo_fast state DOWN mode DEFAULT group default qlen 1000
+    link/ether 88:d7:f6:93:2b:00 brd ff:ff:ff:ff:ff:ff
+3: wlp2s0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc mq state UP mode DORMANT group default qlen 1000
+    link/ether 88:78:73:97:c6:88 brd ff:ff:ff:ff:ff:ff
+27: veth1@veth0: &lt;BROADCAST,MULTICAST,M-DOWN&gt; mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/ether 66:01:80:3c:7d:70 brd ff:ff:ff:ff:ff:ff
+28: veth0@veth1: &lt;BROADCAST,MULTICAST,M-DOWN&gt; mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/ether f6:a7:c5:e4:5a:7b brd ff:ff:ff:ff:ff:ff
+
+# Strange thing above is - both veth0 and veth1 are down and yet the ping works
+# This is because of the &#39;local routing table&#39; see below.
+
+ip route show table local
+local 10.1.0.1 dev veth0  proto kernel  scope host  src 10.1.0.1
+local 10.1.0.2 dev veth1  proto kernel  scope host  src 10.1.0.2
+&lt;snipped&gt;
+
+# bring &#39;up&#39; the interfaces
+ip link set veth0 up
+ip link set veth1 up
+
+# No packets on veth0 and veth1 but packets are seen on lo
+
+tcpdump -i veth0 -n icmp
+
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on veth0, link-type EN10MB (Ethernet), capture size 262144 bytes
+^C
+0 packets captured
+0 packets received by filter
+0 packets dropped by kernel
+
+tcpdump -i veth1 -n icmp
+
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on veth1, link-type EN10MB (Ethernet), capture size 262144 bytes
+^C
+0 packets captured
+0 packets received by filter
+0 packets dropped by kernel
+
+tcpdump -i lo -n icmp
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on lo, link-type EN10MB (Ethernet), capture size 262144 bytes
+15:52:38.940699 IP 10.1.0.1 &gt; 10.1.0.2: ICMP echo request, id 23800, seq 126, length 64
+15:52:38.940717 IP 10.1.0.2 &gt; 10.1.0.1: ICMP echo reply, id 23800, seq 126, length 64
+</pre></div>
+
+
+<p>To be able to bring the interface up in a <code>veth</code> pair, both the interfaces should be set up using <code>ip link set vethX up</code>.</p>
+<p>If we have to force packets to go through the <code>veth</code> interface, we have to assign one of them to a different network namespace. This ensures that local routing table lookup is bypassed and then packets flow through the <code>veth</code> interfaces. This can be achieved as follows -</p>
+<div class="highlight"><pre><span></span># create veth pair
+
+ip link add veth0 type veth peer name veth1
+
+# create a network namespace
+
+ip netns add test
+
+# attach one of the veth interfaces to the network namespace
+
+ip link set veth0 netns test
+
+# bring up the interfaces (note below we&#39;ve to now run ip netns exec test for veth0
+ip link set veth1 up
+ip netns exec test ip link set veth0 up
+
+# assign IP addresses
+ip addr add 10.1.0.2/24 dev veth1
+
+ip netns exec test ip addr add 10.1.0.1/24 dev veth0
+
+# now ping (this pings from veth1 end to veth0). If we want to ping from veth0 to veth1 we&#39;ve to run ping inside &#39;ip netns exec test&#39;
+ping -I 10.1.0.2 10.1.0.1
+
+# check tcpdump on veth0 and veth1
+
+tcpdump -i veth1 -n
+
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on veth1, link-type EN10MB (Ethernet), capture size 262144 bytes
+16:14:59.228785 IP 10.1.0.2 &gt; 10.1.0.1: ICMP echo request, id 24880, seq 21, length 64
+16:14:59.228817 IP 10.1.0.1 &gt; 10.1.0.2: ICMP echo reply, id 24880, seq 21, length 64
+16:15:00.252694 IP 10.1.0.2 &gt; 10.1.0.1: ICMP echo request, id 24880, seq 22, length 64
+16:15:00.252722 IP 10.1.0.1 &gt; 10.1.0.2: ICMP echo reply, id 24880, seq 22, length 64
+16:15:01.276645 IP 10.1.0.2 &gt; 10.1.0.1: ICMP echo request, id 24880, seq 23, length 64
+16:15:01.276674 IP 10.1.0.1 &gt; 10.1.0.2: ICMP echo reply, id 24880, seq 23, length 64
+16:15:02.300690 IP 10.1.0.2 &gt; 10.1.0.1: ICMP echo request, id 24880, seq 24, length 64
+16:15:02.300721 IP 10.1.0.1 &gt; 10.1.0.2: ICMP echo reply, id 24880, seq 24, length 64
+^C
+8 packets captured
+8 packets received by filter
+0 packets dropped by kernel
+
+
+ip netns exec test tcpdump -i veth0 -n
+
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on veth0, link-type EN10MB (Ethernet), capture size 262144 bytes
+^C16:15:45.308779 IP 10.1.0.2 &gt; 10.1.0.1: ICMP echo request, id 24880, seq 66, length 64
+16:15:45.308807 IP 10.1.0.1 &gt; 10.1.0.2: ICMP echo reply, id 24880, seq 66, length 64
+16:15:46.332711 IP 10.1.0.2 &gt; 10.1.0.1: ICMP echo request, id 24880, seq 67, length 64
+16:15:46.332739 IP 10.1.0.1 &gt; 10.1.0.2: ICMP echo reply, id 24880, seq 67, length 64
+16:15:47.356645 IP 10.1.0.2 &gt; 10.1.0.1: ICMP echo request, id 24880, seq 68, length 64
+16:15:47.356670 IP 10.1.0.1 &gt; 10.1.0.2: ICMP echo reply, id 24880, seq 68, length 64
+16:15:48.380769 IP 10.1.0.2 &gt; 10.1.0.1: ICMP echo request, id 24880, seq 69, length 64
+16:15:48.380798 IP 10.1.0.1 &gt; 10.1.0.2: ICMP echo reply, id 24880, seq 69, length 64
+16:15:49.404682 IP 10.1.0.2 &gt; 10.1.0.1: ICMP echo request, id 24880, seq 70, length 64
+16:15:49.404714 IP 10.1.0.1 &gt; 10.1.0.2: ICMP echo reply, id 24880, seq 70, length 64
+
+10 packets captured
+10 packets received by filter
+0 packets dropped by kernel
+</pre></div>
+
+
+<p>Typically the way <code>veth</code> interfaces are used is to connect one end to a network namespace and another end to a bridge. Interesting observation here though is - If we do this and assign IP address to one of the <code>veth</code> pairs say <code>veth1</code>, then the ping doesn't work. When looked in details why this happens, it is not clear. However if we assign the IP address to the br0 interface, then the ping works. Why this happens is not quite clear.</p>
+<h3><code>veth</code> Interfaces summary</h3>
 <ol>
-<li>It was not obvious, but MPLS labels can be setup only in the main routing table (so specifying table parameter throws <code>EINVAL</code> and as with many <code>RTNETLINK</code> errors, this one is a bit hard to figure out. Just figured this out by reading the appropriate code.</li>
-<li>Unless you actually setup using <code>sysctl -w net.mpls.platform_labels=10000</code>, setting up label values throws an <code>EINVAL</code> error, so one has to first set this up.</li>
-<li>The way I was going about creating most of the interfaces was, I was first creating an interface in the default namespace and then assigning the <code>netns</code> using <code>ip link set &lt;dev&gt; netns &lt;nsname&gt;</code>. While this works for <code>veth</code> devices, this doesn't work for VRF devices. My first impression was that setting VRF in a non-default <code>netns</code> is not allowed, while that is not the case, moving VRF from one netns to another is not allowed. So the best way to go about creating that is - to actually create the VRF device in the correct <code>netns</code> first time itself.</li>
-<li>Faced a weird issue - while the setup looked all fine, was not able to ping from the hosts across MPLS network. The packets were not getting forwarded on one of the PE routers. A debugging using <code>tcpdump</code> showed that while the route was properly setup, the packets didn't show up on the corresponding interface. Actually, Dave Ahern of Cumulus who had given the tutorial above helped in solving this issue by basically asking to trace fib events <code>perf record -efib:*</code> and then <code>perf script</code>. The lookup was working fine but what was observed was <code>fib_validate_source</code> was failing. This was because the VRF routing table didn't have a default route (which is always recommended) and it didn't have a route to the source subnet. Due to absence of this route, the source was treated as <code>martian</code>, which was later verified using <code>sysctl -w net.ipv4.conf.all.log_martian=1</code>. Finally after adding the route to the source subnet the issue was resolved.</li>
-<li>After all the above issues were resolved a rather odd issue showed up, while it was possible to ping across hosts, it was not possible to ping the host itself. This is because, when we create a <code>netns</code>, the loopback interface <code>lo</code> in that network interface is not set as up by default. This is fixed by setting <code>ip netns exec netnsname ip link setup lo up</code>.</li>
+<li>Use them to connect two network namespaces</li>
+<li>Always one has to bring both ends of the <code>veth</code> pair up for the interface to be up.</li>
+<li>If we attach one of the interface to a bridge, then the IP address needs to be attached to the bridge interface and not the attached interface.</li>
 </ol>
-<h2>Demo</h2>
-<p>Following <a href="https://github.com/gabhijit/networking-experiments">github repository</a> has complete setup.</p>
+<h2><code>tun/tap</code> Virtual Interface</h2>
+<p>Mainly <code>tun</code> and <code>tap</code> interfaces are used to inject IP packets to/from kernel from userspace. The way this typically works is a <code>/dev</code> entry is created when a process binds to an interface and process can simply <code>read/write</code> from the <code>/dev/</code> for the packet transfer. A more detailed look at how tun/tap interfaces work is given in <a href="http://backreference.org/2010/03/26/tuntap-interface-tutorial/">this link</a> and it is worth following that for details. <code>tap</code> interfaces are typically used by Virtual Machines, where full Layer 2 headers are also used. For other applications like <code>openvpn</code>, typically make use of <code>tun</code> interface type.</p>
+<p>To be able to use <code>tap</code> interface, one has to bind to the tap interface. The link above shows one example or a similar example from <code>qemu</code> source is <a href="https://github.com/qemu/qemu/blob/08a63553161d9d12fba217f07af49f986b487e9a/net/tap-linux.c#L41">availble here</a></p>
 <h2>References</h2>
-<p>Some references used for this experiment -</p>
+<p>Following is a list of links on the web that I referred to while experimenting with Virtual Interfaces.</p>
 <ol>
-<li><a href="https://www.netdevconf.org/1.1/proceedings/slides/ahern-vrf-tutorial.pdf">Tutorial PDF</a></li>
-<li><a href="https://www.youtube.com/watch?v=zxPFFdRN_x4">Tutorial Video</a> - See VRF with MPLS use-case</li>
-<li>Stack-Exchange discussion related to <a href="https://unix.stackexchange.com/questions/401719/rtnetlink-answers-invalid-argument-mpls-on-mininet">MPLS labels</a></li>
-</ol>
-<h2>Next steps</h2>
-<p>While the script is fairly well organized, this is still very hard-coded for the above setup and totally inflexible. A better idea would be to make a small tool which can read topology and create setups easily. For example, something like a dot file reader that generates a yaml and a python script that generates topology using this YAML file.</p>                </article>
-            </aside><!-- /#featured -->
-                <section id="content" class="body">
-                    <h1>Other articles</h1>
-                    <hr />
-                    <ol id="posts-list" class="hfeed">
+<li><a href="">http://www.naturalborncoder.com/virtualization/2014/10/17/understanding-tun-tap-interfaces/</a></li>
+<li><a href="">https://lists.linuxfoundation.org/pipermail/bridge/2011-June/007711.html</a></li>
+<li><a href="">https://stackoverflow.com/questions/25641630/virtual-networking-devices-in-linux#34773334</a></li>
+<li><a href="">http://www.opencloudblog.com/?p=66</a></li>
+<li><a href="">https://unix.stackexchange.com/questions/122468/how-does-one-capture-traffic-on-virtual-interfaces</a></li>
+<li><a href="">https://serverfault.com/questions/585246/network-level-of-veth-doesnt-respond-to-arp?newreg=fa2af6ce40ad43318ac4b32054741cd7</a></li>
+<li><a href="">http://backreference.org/2013/06/20/some-notes-on-veth-interfaces/</a></li>
+<li><a href="">https://serverfault.com/questions/743466/tcpdump-on-bridge-interface-virbr-does-not-receive-any-packets-destined-for-on</a></li>
+</ol></div>
+        <hr />
+    </div>
+		
+<div class="pagination">
+<ul>
+    <li class="prev disabled"><a href="#">&larr; Previous</a></li>
 
-            <li><article class="hentry">
-                <header>
-                    <h1><a href="/linux-virtual-interfaces.html" rel="bookmark"
-                           title="Permalink to Linux Virtual Interfaces">Linux Virtual Interfaces</a></h1>
-                </header>
+    <li class="active"><a href="/category/2018.html">1</a></li>
 
-                <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2018-02-23T00:00:00+05:30">
-                Published: Fri 23 February 2018
-        </abbr>
+    <li class="next disabled"><a href="#">&rarr; Next</a></li>
 
-        <address class="vcard author">
-                By                         <a class="url fn" href="/author/abhijit-gadgil.html">Abhijit Gadgil</a>
-        </address>
-<p>In <a href="/category/2018.html">2018</a>.</p>
-<p>tags: <a href="/tag/linux.html">Linux</a> <a href="/tag/linux-networking.html">Linux-networking</a> <a href="/tag/veth.html">veth</a> <a href="/tag/tap.html">tap</a> <a href="/tag/tun.html">tun</a> </p>
-</footer><!-- /.post-info -->                <p>Linux supports <code>veth</code> and <code>tun/tap</code> types of virtual interfaces, which are used by VMs, Containers for providing networking. This post summarizes certain findings as a result of experimenting these virtual interfaces along with Linux's Ethernet bridge.</p>
-                <a class="readmore" href="/linux-virtual-interfaces.html">read more</a>
-                </div><!-- /.entry-content -->
-            </article></li>
-                </ol><!-- /#posts-list -->
-                </section><!-- /#content -->
-        <section id="extras" class="body">
-                <div class="blogroll">
-                        <h2>links</h2>
-                        <ul>
-                            <li><a href="http://getpelican.com/">Pelican</a></li>
-                            <li><a href="http://python.org/">Python.org</a></li>
-                            <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
-                            <li><a href="#">You can modify those links in your config file</a></li>
-                        </ul>
-                </div><!-- /.blogroll -->
-                <div class="social">
-                        <h2>social</h2>
-                        <ul>
+</ul>
+</div>
+ 
+  
+        </div>
+        
+        <div class="span3">
 
-                            <li><a href="#">You can add links in your config file</a></li>
-                            <li><a href="#">Another social link</a></li>
-                        </ul>
-                </div><!-- /.social -->
-        </section><!-- /#extras -->
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header"> 
+                Site
+                </li>
+            
+                <li><a href="/archives.html">Archives</a>
+                <li><a href="/tags.html">Tags</a>
 
-        <footer id="contentinfo" class="body">
-                <address id="about" class="vcard body">
-                Proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
-                </address><!-- /#about -->
 
-                <p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
-        </footer><!-- /#contentinfo -->
 
+
+            </ul>
+            </div>
+
+
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header"> 
+                Categories
+                </li>
+                
+                <li><a href="/category/2018.html">2018</a></li>
+                <li><a href="/category/linux-networking.html">Linux Networking</a></li>
+                   
+            </ul>
+            </div>
+
+
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header"> 
+                Links
+                </li>
+            
+                <li><a href="http://getpelican.com/">Pelican</a></li>
+                <li><a href="http://python.org/">Python.org</a></li>
+                <li><a href="http://jinja.pocoo.org/">Jinja2</a></li>
+                <li><a href="#">You can modify those links in your config file</a></li>
+            </ul>
+            </div>
+
+
+            <div class="social">
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header"> 
+                Social
+                </li>
+           
+                <li><a href="https://github.com/gabhijit">Github</a></li>
+                <li><a href="https://www.linkedin.com/in/amgadgil/">LinkedIn</a></li>
+            </ul>
+            </div>
+            </div>
+
+        </div>  
+    </div>     </div> 
+<footer>
+<br />
+<p><a href="">Abhijit's Blog</a> &copy; Abhijit Gadgil 2018</p>
+</footer>
+
+</div> <!-- /container -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="/theme/bootstrap-collapse.js"></script>
+ 
 </body>
 </html>
