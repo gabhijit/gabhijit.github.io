@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Abhijit's Blog - veth</title>
+    <title>Abhijit's Blog - LTE</title>
     <meta name="description" content="">
     <meta name="author" content="Abhijit Gadgil">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,22 +56,22 @@
 
 
     <div class='article'>
-        <a href="https://gabhijit.github.io/linux-virtual-interfaces.html"><h2>Linux Virtual Interfaces</h2></a>
-        <div class= "well small"> 23/02/2018
+        <a href="https://gabhijit.github.io/oai-oaisim-enb-epc-netns.html"><h2>OpenAirInterface with Linux Network Namespaces</h2></a>
+        <div class= "well small"> 15/03/2018
 
 by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html">Abhijit Gadgil</a>
  
 
 
  </div>
-        <div class="summary"><p>Linux supports <code>veth</code> and <code>tun/tap</code> types of virtual interfaces, which are used by VMs, Containers for providing networking. This post summarizes certain findings as a result of experimenting these virtual interfaces along with Linux's Ethernet bridge.</p> <a class="btn btn-info xsmall" href="https://gabhijit.github.io/linux-virtual-interfaces.html">read more</a></div>
+        <div class="summary"><p><a href="http://www.openairinterface.org/">OpenAirInterface</a> aims to develop open source software solutions for 4G and 5G cellular network, that would run on COTS hardware (typically x86/ARM based CPUs). The project provides an Air Interface Simulator (OAISIM) and implementations of eNodeB and the EPC. OAISIM allows one to test the software implementations of the Network components, without actually having access to the RF part. While there are many tutorials that allow you to connect OAISIM + eNodeB on one machine and connect it with EPC (MME/SGW and PGW) running on another machine, I was not able to find any good tutorial that allowed to connect these devices on the same machine. While, it's quite possible to do so by using two VMs on the same machine, two VMs still looked like sub-optimal as in theory it looked quite possible to do this using Network Namespaces to provide isolations for individual box. Further, using network namespaces would allow to containerize this quite easily. Since the development platform I am using is also not the same one for which documentation is available, I had to do some tweaking to build the components as well. This blog post discusses this in details.</p> <a class="btn btn-info xsmall" href="https://gabhijit.github.io/oai-oaisim-enb-epc-netns.html">read more</a></div>
     </div>
 
 <div class="pagination">
 <ul>
     <li class="prev disabled"><a href="#">&larr; Previous</a></li>
 
-    <li class="active"><a href="https://gabhijit.github.io/tag/veth.html">1</a></li>
+    <li class="active"><a href="https://gabhijit.github.io/tag/lte.html">1</a></li>
 
     <li class="next disabled"><a href="#">&rarr; Next</a></li>
 

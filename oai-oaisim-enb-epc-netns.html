@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Abhijit's Blog - OpenAirInterface with Linux Network Namespaces</title>
+    <meta name="description" content="">
+    <meta name="author" content="Abhijit Gadgil">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+    <script src="https://gabhijit.github.io/theme/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="https://gabhijit.github.io/theme/bootstrap.min.css" rel="stylesheet">
+    <link href="https://gabhijit.github.io/theme/bootstrap.min.responsive.css" rel="stylesheet">
+    <link href="https://gabhijit.github.io/theme/local.css" rel="stylesheet">
+    <link href="https://gabhijit.github.io/theme/pygments.css" rel="stylesheet">
+    <link href="https://gabhijit.github.io/theme/tagcloud.css" rel="stylesheet">
+
+    <!-- So Firefox can bookmark->"abo this site" -->
+
+</head>
+
+<body>
+
+<div class="navbar">
+    <div class="navbar-inner">
+    <div class="container">
+
+         <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+             <span class="icon-bar"></span>
+             <span class="icon-bar"></span>
+             <span class="icon-bar"></span>
+         </a>
+
+        <a class="brand" href="https://gabhijit.github.io">Abhijit's Blog</a>
+
+        <div class="nav-collapse">
+        <ul class="nav">
+
+        </ul>
+        </div>
+
+    </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="content">
+    <div class="row">
+
+        <div class="span9">
+    <div class='article'>
+        <div class="content-title">
+            <h1>OpenAirInterface with Linux Network Namespaces</h1>
+15/03/2018
+
+by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html">Abhijit Gadgil</a>
+ 
+
+
+        </div>
+	
+        <div><h1>Intended Audience</h1>
+<p>A familiarity with LTE network architecture and some knowledge about different interfaces is certainly useful. Some background about Linux network namespaces is quite useful as well.</p>
+<h1>Background</h1>
+<p>A bit of a background - OAI Wiki has <a href="https://gitlab.eurecom.fr/oai/openairinterface5g/wikis/T/howtoconnectoaisimwithoaiepc">instructions to connect eNodeB with EPC</a> where both of them are running on separate machines. The instructions were for a rather old release ( v0.4). The instructions are for Ubuntu 14.04. My development machine is Ubuntu 16.04, so I wanted something that would work on Ubuntu 16.04, which means I had to rebuild the software on Ubuntu 16.04. Then we could leverage network namespaces to create a topology inside the Linux box to implement the <a href="https://www.tutorialspoint.com/lte/images/lte_epc.jpg">LTE Network Architecture</a>. The final goal is to be able to ping Internet from the emulated UE on the OAISIM.</p>
+<h1>Building The Stack</h1>
+<p>The OAI codebase is actually made up of two repositories available from Eurocomm Gitlab -
+1. The RAN side is implemented in the <a href="https://gitlab.eurecom.fr/oai/openairinterface5g">openairinterface5g repository</a>
+2. The CN side is implemented in the <a href="https://gitlab.eurecom.fr/oai/openair-cn">openair-cn repository</a></p>
+<h2>Build RAN Side Components</h2>
+<p>I didn't follow the <code>-I</code> option available with the build scripts. The reason being, some of them are patching older versions of software, so just wanted to see how it goes without having to do that. Only a couple of dependencies were obtained from the source - asn1c and free diameter (see below), but everything else is a package available from a standard repository of Ubuntu 16.04 and nothing is patched. I particularly don't like patching older versions of dependencies with some non-standard sources, because that makes the build very fragile and only works on a very limited set of environments.</p>
+<p>Did face a few issues to get the build successful -</p>
+<ol>
+<li>
+<p>The head of the develop branch was having issue with libconfig, so it was not possible to use the head of the develop branch.</p>
+</li>
+<li>
+<p>The original version for which documentation was available for setting up OAISIM with EPC, was 0.4, however it was not building on Ubuntu 16.04. The problem was some of the ASN.1 files for RRC were patched with an older version of <a href="">asn1c</a> which was available for Ubuntu 14.04, so it was not possible to patch those files with asn1c available for Ubuntu 16.04. This required a little bit of figuring around to find out what was the latest enough and well tagged version. Version 0.6.1 works fine, that uses asn1c hosted on <a href="https://gitlab.eurecom.fr/oai/asn1c">eurocomm gitlab</a>.</p>
+</li>
+<li>
+<p>Since both eNodeB and EPC will be running on same Kernel, a kernel version that supports GTP is required. GTP is available in the mainline Linux tree since Kernel version 4.7.0. My running kernel version was 4.15.0, so it should be possible to use the GTP module available in the kernel. However, the UE IP module inside the openairinterface5g repository that emulates the UE side was not getting built on the 4.15.0 kernel, this is because there was a slight change in the timer interface in the 4.15.X kernel. So I <a href="https://github.com/gabhijit/oai5g/blob/gabhijit-v0.6.1/openair2/NETWORK_DRIVER/UE_IP/device.c">patched</a> the UE-IP module inside my repository, so that it got successfully compiled.</p>
+</li>
+<li>
+<p>There was another issue - <code>libnettle</code> available on Ubuntu 14.04 was major version 2.X. The one available on Ubuntu 16.04 was 3.X and signatures of some of the functions were changed, so that was required to be fixed.</p>
+</li>
+<li>
+<p>Also had to use the Free Diameter hosted on <a href="https://gitlab.eurecom.fr/oai/freediameter">eurocomm gitlab</a> to build the CN side.</p>
+</li>
+</ol>
+<p>All of the changes are maintained in a <a href="https://github.com/gabhijit/oai5g">repository on github</a>. One of the reasons I am doing this and not up streaming those changes yet is - eventually my repository will have breaking changes from the original repository - especially the build system and the <code>-I</code> flag. Once I am able to fix it reasonably well, it might be a good time to up-stream those changes.</p>
+<h2>Building EPC Components</h2>
+<p>Building of EPC components was quite straight forward. Just following the build scripts was enough. I at-least don't remember having to do a lot of tweaking to get it working.</p>
+<h1>Running OAI</h1>
+<p>Once the required software components are built, a network topology as shown in figure below is created.</p>
+<p><img alt="OAI TOPOLOGY" src="/images/oai-sim-epc-topology.png" title="OAI Topology"></p>
+<p>The scripts used to create this topology are <a href="https://github.com/gabhijit/networking-experiments/tree/master/oai-oaisim-enb-epc">maintained in this repository</a>. The details of how to setup and run all the nodes are specified in the README file in the location above.</p>
+<p>In trying to run OAI inside the same Linux machine, we are making use of network namespaces to achieve that. So basically each network namespace provides isolation between the nodes and the nodes are connected using <code>veth</code> pairs and/or <code>bridge</code> interfaces wherever required. Figure below explains the topology and the networks we are using -</p>
+<ol>
+<li>The eNodeB MME - S1-MME interface is implemented as a 10.0.0.0/24 network</li>
+<li>The MME-HSS - S6A interface is implemented as a 10.0.1.0/24 network</li>
+<li>The eNodeB-SGW - S1-U interface is implemented as a 10.0.2.0/24 network</li>
+<li>The MME-SGW - S11 interface is implemented as a 10.0.3.0/24 network</li>
+<li>The HSS-Host implements another interface for communication between the HSS and MySQL running in default (host) namespace.</li>
+<li>The PGW - SGi interface is right now implemented as a 10.0.5.0/24 network through a bridge.</li>
+</ol>
+<p>Once all the setup is done, it should be possible to ping Internet from the simulated UE.</p></div>
+	
+        <hr>
+
+        <h2>Comments</h2>
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'gabhijit-github-io'; 
+    var disqus_title = 'OpenAirInterface with Linux Network Namespaces';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+        </div>
+
+        <div class="span3">
+
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header">
+                Site
+                </li>
+
+                <li><a href="https://gabhijit.github.io/archives.html">Archives</a>
+                <li><a href="https://gabhijit.github.io/tags.html">Tags</a>
+
+
+
+
+            </ul>
+            </div>
+
+
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header">
+                Categories
+                </li>
+
+                <li><a href="https://gabhijit.github.io/category/linux-networking.html">Linux Networking</a></li>
+                <li><a href="https://gabhijit.github.io/category/oai.html">OAI</a></li>
+                <li><a href="https://gabhijit.github.io/category/python.html">Python</a></li>
+                <li><a href="https://gabhijit.github.io/category/python-profiling.html">Python Profiling</a></li>
+            </ul>
+            </div>
+
+
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header">
+                Links
+                </li>
+
+                <li><a href="http://getpelican.com/">Pelican</a></li>
+            </ul>
+            </div>
+
+
+            <div class="social">
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header">
+                Social
+                </li>
+
+                <li><a href="https://github.com/gabhijit">Github</a></li>
+                <li><a href="https://www.linkedin.com/in/amgadgil/">LinkedIn</a></li>
+                <li><a href="https://stackoverflow.com/users/2845044/gabhijit">StackOverflow</a></li>
+            </ul>
+            </div>
+            </div>
+
+        </div>     </div>     </div> 
+<footer>
+<br />
+<p><a href="https://gabhijit.github.io">Abhijit's Blog</a> &copy; Abhijit Gadgil 2018</p>
+</footer>
+
+</div> <!-- /container -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="https://gabhijit.github.io/theme/bootstrap-collapse.js"></script>
+</body>
+</html>
