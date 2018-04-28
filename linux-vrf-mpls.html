@@ -73,7 +73,7 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 <p>This setup is explained in the <a href="https://www.netdevconf.org/1.1/proceedings/slides/ahern-vrf-tutorial.pdf">document</a> and is reproduced below</p>
 <p><img alt="VRF MPLS Topology" src="/images/vrf-mpls-topology.png" title="Topology"></p>
 <ol>
-<li>Each of the device (Host, CE, PE or P) lives in it's own <code>netns</code>. <code>veth</code> and <code>bridge</code> links are used as appropriate to connect the hosts (making sure also that their end-points are in the right <code>netns</code>.</li>
+<li>Each of the device (Host, CE, PE or P) lives in it's own <code>netns</code>. <code>veth</code> and <code>bridge</code> links are used as appropriate to connect the hosts (making sure also that their end-points are in the right <code>netns</code>).</li>
 <li>Linux implementation of <code>vrf</code> is a <code>netdevice</code>. So one VRF <code>netdevice</code> is created for each of the customer in the same PE router, thus there are two VRF <code>netdevice</code>s in the PE router.</li>
 <li>The physical devices (<code>veth</code> endpoints) that connect to the customer edge router (CE Router) are enslaved to the VRF <code>netdevice</code> corresponding to that customer.</li>
 <li>For each of the VRF <code>netdevice</code>, there's a separate routing table setup for lookup and corresponding <code>l3mdev</code> rules are added for making sure the packet lookup happens in the correct routing table.</li>
