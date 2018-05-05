@@ -40,6 +40,8 @@
         <div class="nav-collapse">
         <ul class="nav">
 
+            <li><a href="https://gabhijit.github.io/pages/abhijit-gadgil.html">Abhijit Gadgil</a></li>
+            <li><a href="https://gabhijit.github.io/pages/contact.html">Contact</a></li>
         </ul>
         </div>
 
@@ -111,17 +113,18 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 <p>Some of the things in the above setup are less than ideal. Documenting those here for reference -</p>
 <ol>
 <li>
-<p>MySQL database is used by HSS. It is possible to run the database in the HSS namespace. However, the above setup does not do so. Once this is done, no additional setup requirements for connecting to the database will be required.</p>
+<p>MySQL database is used by HSS. It is possible to run the database in the HSS namespace. However, the above setup does not do so. Once this is done, no additional configuration requirements for connecting to the database will be required.</p>
 </li>
 <li>
 <p>On the egrees ie. SGi interface we are using MacVTAP to connect to external world. MacVTAP interfaces do not work so well with WLAN interfaces. So it is recommended to use a wired Ethernet interface to use MacVTAP on the egress. Right now, not entirely sure of what's the best way to deal with that problem, one choice would be to use separate network and bridge it to external world and apply some kind of SNAT. This needs some more work.</p>
 </li>
 <li>
-<p>eNodeB does not run in it's own namespace. To be able to do that, the UE-IP driver should be patched to work in any network namespace. Right now it uses - <code>netlink_kernel_create</code> along with <code>&amp;init_net</code> passed to it, which is the default namespace. This needs some more investigation.</p>
+<p>eNodeB does not run in it's own namespace. To be able to do that, the UE-IP driver should be patched to work in any network namespace. Right now it uses - <code>netlink_kernel_create</code> along with <code>&amp;init_net</code> passed to it, which is the default namespace. This needs some more investigation. Update: This is fixed in <code>ue_ip.ko</code> kernel module and the latest changes are <a href="https://github.com/gabhijit/oai5g">updated in this repository</a>. This needs some more testing to say this works.</p>
 </li>
 </ol>
 <h2>Summary and Next Steps</h2>
-<p>Since we are able to run individual nodes inside separate network namespace, containerizing this should be kind of straight forward. Will explore this in a subsequently.</p></div>
+<p>Since we are able to run individual nodes inside separate network namespace, containerizing this should be kind of straight forward. Will explore this in a follow up.</p>
+<p>If anyone wants to try this out on any platform, please do so and if you face any problems, please create issues in the repositories, so that I can fix those.</p></div>
 	
         <hr>
 
