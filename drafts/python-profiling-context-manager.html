@@ -65,7 +65,8 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 
         </div>
 	
-        <div><p>Recently, was implementing a class, where, we wanted to be able to 'plug-in' profiling in some functions. Summarizing some of the requirements -</p>
+        <div><h1>Introduction</h1>
+<p>Recently, while implementing a class for a project, we needed to profile parts of the code as some of the observations <a href="">were quite un-intuitive</a>. It was also important to identify the parts of code that were expensive and the kind of time they would take (strictly speaking profiling using <code>cProfile</code> won't be able to help much here.). Loosely speaking the requirements can be summarized as follows -</p>
 <ol>
 <li>
 <p>Ability to add profiling information in several places in code. (Something like <code>cProfile.Profile().enable()</code> and <code>cProfile.Profile.disable()</code> done frequently.</p>
@@ -74,10 +75,10 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 <p>Ability to enable profiling globally or not, so when globally disabled, it should add a minimum overhead.</p>
 </li>
 <li>
-<p>Being able to keep related profiling information with the code.</p>
+<p>Being able to keep related profiling information with the code itself.</p>
 </li>
 </ol>
-<p>My initial idea was to have a class wide <code>cProfile.Profile()</code> object and keep enabling and disabling it for the parts of the code I wanted to profile. There are a few problems with this - viz.</p>
+<p>Initial idea was to have a class wide <code>cProfile.Profile()</code> object and keep enabling and disabling it for the parts of the code that was to be profiled. However, this approach was a bit problematic and didn't look very elegant as -</p>
 <ol>
 <li>
 <p>The code gets littered with <code>enable</code>/<code>disable</code> code.</p>
@@ -89,63 +90,114 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 <p>Dumping stats only for some part of the code - in a section would become a little irritating to handle (see below).</p>
 </li>
 </ol>
-<p>For this type of problems, Context Managers in Python look like a good choice. All the <code>enable</code>/<code>disable</code> logic, <code>if</code> conditions etc. can be neatly wrapped inside the <code>__enter__</code> and <code>__exit__</code> methods.</p>
-<p>The code for the <code>class Profiler</code> looks like following</p>
-<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Profiler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<p>For this type of problems, Context Managers in Python look like a good choice. All the <code>enable</code>/<code>disable</code> logic, <code>if</code> conditions etc. can be neatly wrapped inside the <code>__enter__</code> and <code>__exit__</code> methods and then selective profiling can simply be used as</p>
+<div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">Profiler</span><span class="p">(</span><span class="n">contextstr</span><span class="o">=</span><span class="s2">&quot;----- foo profiling ----&quot;</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+     <span class="c1"># Run the profiled code here</span>
+</pre></div>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">contextstr</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-                <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">                parent: the callee</span>
-<span class="sd">                enabled: Should profile or not</span>
-<span class="sd">                contextstr: used as a marker to separate dump data.</span>
-<span class="sd">                &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="bp">True</span>
+<p>As can be seen, the readability of such a code is way better than say -</p>
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiling_enabled</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cprofiler</span><span class="o">.</span><span class="n">enable</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span> <span class="o">=</span> <span class="n">StringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+<span class="c1"># do something</span>
+
+<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">profiling_enabled</span><span class="p">:</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">cprofiler</span><span class="o">.</span><span class="n">disable</span><span class="p">()</span>
+</pre></div>
+
+
+<h1>Implementation</h1>
+<p>The complete implementation for the <code>class Profiler</code> looks like following taken from <a href="">tickerplot utils</a>.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cProfile</span>
+<span class="kn">import</span> <span class="nn">StringIO</span>
+<span class="kn">import</span> <span class="nn">pstats</span>
+
+<span class="k">class</span> <span class="nc">Profiler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">contextstr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                 <span class="n">sort_by</span><span class="o">=</span><span class="s1">&#39;cumulative&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">enabled</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">contextstr</span> <span class="o">=</span> <span class="n">contextstr</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">fraction</span> <span class="o">&gt;</span> <span class="mf">1.0</span> <span class="ow">or</span> <span class="n">fraction</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="n">fraction</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fraction</span> <span class="o">=</span> <span class="n">fraction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sort_by</span> <span class="o">=</span> <span class="n">sort_by</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span> <span class="o">=</span> <span class="n">StringIO</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span> <span class="o">=</span> <span class="n">cProfile</span><span class="o">.</span><span class="n">Profile</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
-            <span class="k">return</span>
+            <span class="k">return</span> <span class="bp">self</span>
 
         <span class="c1"># Start profiling.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;profile: {}: enter</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contextstr</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">profile: {}: enter</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contextstr</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">enable</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
-            <span class="k">return</span>
+            <span class="k">return</span> <span class="bp">False</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="o">.</span><span class="n">disable</span><span class="p">()</span>
 
-        <span class="n">sort_by</span> <span class="o">=</span> <span class="s1">&#39;cumulative&#39;</span>
+        <span class="n">sort_by</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_by</span>
         <span class="n">ps</span> <span class="o">=</span> <span class="n">pstats</span><span class="o">.</span><span class="n">Stats</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">profiler</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="p">)</span><span class="o">.</span><span class="n">sort_stats</span><span class="p">(</span><span class="n">sort_by</span><span class="p">)</span>
-        <span class="n">ps</span><span class="o">.</span><span class="n">print_stats</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="n">ps</span><span class="o">.</span><span class="n">print_stats</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fraction</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;profile: {}: exit</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contextstr</span><span class="p">))</span>
-        <span class="k">print</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">profile: {}: exit</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contextstr</span><span class="p">))</span>
 
-                <span class="c1"># Raise any exception if raised during execution of code.</span>
-              <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">get_profile_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">value</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+
+    <span class="kn">import</span> <span class="nn">re</span>
+
+    <span class="k">with</span> <span class="n">Profiler</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">contextstr</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^$&#39;</span><span class="p">)</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">get_profile_data</span><span class="p">())</span>
+
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">Profiler</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">contextstr</span><span class="o">=</span><span class="s1">&#39;exception&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Error&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">get_profile_data</span><span class="p">())</span>
+
+
+    <span class="n">profiling_enabled</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">with</span> <span class="n">Profiler</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="n">profiling_enabled</span><span class="p">,</span> <span class="n">contextstr</span><span class="o">=</span><span class="s1">&#39;not enabled&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^$&#39;</span><span class="p">)</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">get_profile_data</span><span class="p">())</span>
 </pre></div>
 
 
-<p>And then this code can be called as follows -</p>
-<div class="highlight"><pre><span></span>        <span class="k">with</span> <span class="n">Profiler</span><span class="p">(</span><span class="n">contextstr</span><span class="o">=</span><span class="s2">&quot;---foo profiling ----&quot;</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-                <span class="c1"># code to be profiled</span>
-</pre></div>
-
-
-<p>Pretty simple and extremely readable. Also, this just works fine as a nested Context Manager, cool right?</p>
-<p>Some Notes:</p>
+<p>The code above is quite simple and extremely readable. Also as can be seen quite easy to plug-in in a running code. There are some important things to be kept in mind -</p>
 <ol>
-<li>Just noticed a quirk of <code>pstats.Stats</code> Constructor. If we pass a <code>Profile</code> object to the <code>pstats.Stats</code> Constructor as above, unless the <code>Profile</code> object is <code>enable</code>d, the Constructor raises an Exception that looks like -</li>
+<li>A quirk of <code>pstats.Stats</code> Constructor. If we pass a <code>Profile</code> object to the <code>pstats.Stats</code> Constructor as above, unless the <code>Profile</code> object is <code>enable</code>d, the Constructor raises an Exception that looks like -</li>
 </ol>
 <div class="highlight"><pre><span></span>  File <span class="s2">&quot;/usr/lib/python2.7/pstats.py&quot;</span>, line <span class="m">81</span>, in __init__
     self.init<span class="o">(</span>arg<span class="o">)</span>
@@ -158,8 +210,15 @@ TypeError: Cannot create or construct a &lt;class pstats.Stats at 0x7f683bec19a8
 
 
 <ol>
-<li>Also, returning <code>False</code> would make sure, if the running code within a <code>with</code> block raised an exception, that gets re-raised (so we do not mess up with the Application flow by consuming exceptions.)</li>
-</ol></div>
+<li>
+<p>Just like the normal <code>__exit__</code> mechanism, returning <code>False</code> would make sure, if the running code within a <code>with</code> block raised an exception, that gets re-raised (as we often do not want to interfere with the Application's exception handing.).</p>
+</li>
+<li>
+<p>This works quite well in a nested 'context' (ie. a <code>with</code> inside a <code>with</code>).</p>
+</li>
+</ol>
+<h1>Summary</h1>
+<p>This is quite a handy utility class, that I often plugin whenever I want to add some profiling to the code on the fly.</p></div>
 	
         <hr>
 
