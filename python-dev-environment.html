@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Abhijit's Blog - Python Project Workflows - Part 1</title>
+    <meta name="description" content="">
+    <meta name="author" content="Abhijit Gadgil">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+    <script src="https://gabhijit.github.io/theme/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="https://gabhijit.github.io/theme/bootstrap.min.css" rel="stylesheet">
+    <link href="https://gabhijit.github.io/theme/bootstrap.min.responsive.css" rel="stylesheet">
+    <link href="https://gabhijit.github.io/theme/local.css" rel="stylesheet">
+    <link href="https://gabhijit.github.io/theme/pygments.css" rel="stylesheet">
+    <link href="https://gabhijit.github.io/theme/tagcloud.css" rel="stylesheet">
+
+    <!-- So Firefox can bookmark->"abo this site" -->
+
+</head>
+
+<body>
+
+<div class="navbar">
+    <div class="navbar-inner">
+    <div class="container">
+
+         <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+             <span class="icon-bar"></span>
+             <span class="icon-bar"></span>
+             <span class="icon-bar"></span>
+         </a>
+
+        <a class="brand" href="https://gabhijit.github.io">Abhijit's Blog</a>
+
+        <div class="nav-collapse">
+        <ul class="nav">
+
+            <li><a href="https://gabhijit.github.io/pages/abhijit-gadgil.html">Abhijit Gadgil</a></li>
+            <li><a href="https://gabhijit.github.io/pages/contact.html">Contact</a></li>
+        </ul>
+        </div>
+
+    </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="content">
+    <div class="row">
+
+        <div class="span9">
+    <div class='article'>
+        <div class="content-title">
+            <h1>Python Project Workflows - Part 1</h1>
+08/05/2018
+
+by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html">Abhijit Gadgil</a>
+ 
+
+
+        </div>
+	
+        <div><h1>Intended Audience</h1>
+<p>If you have done some Python programming, but unsure of what are the best practices to follow in a slightly bigger project, this post will offer you some choices (since best choices are often very subjective there is no one good practice.)</p>
+<p>Some knowledge of tools in Python ecosystem like <code>pip</code>, <code>virtualenv</code>, <code>pylint</code> is useful. If you have never heard about them, the discussion below might still be useful, but is definitely not an introduction or a tutorial on the usage of those tools.</p>
+<p>Also, working knowledge of VCS like <code>git</code> might be useful because the discussion below assumes that you are developing project in a VCS like <code>git</code>. You should be using <code>git</code> even if you do not want to follow any of the workflow discussed here.</p>
+<p>If you have forked a project and are unsure of what some of those files in the projects like <code>requirements.txt</code>, <code>Pipfile</code>, <code>Pipfile.lock</code>, <code>setup.py</code> are, this should help you develop some understanding of that.</p>
+<h1>Introduction</h1>
+<p>Whenever I have an idea to try out, my simplest workflow is either open a Python file in <code>vim</code> and then simply run <code>python file.py</code> or sometimes just fire a Python interactive shell and do stuff. This is #1 among the things that I love about Python as it allows you to quickly iterate over ideas. However, when the scope of things you are trying to do goes beyond a single Python file and what is provided by Python standard library, the above workflow can start becoming at the very least inadequate and even full of unpleasant surprises in some cases. Things become even more challenging when there are multiple developers working on the project. So usually, it's probably a good idea to give some thoughts to the development setup early enough, rather than 'overlay' some workflow later. Some of the specific issues that we would like to address include -</p>
+<ol>
+<li>
+<p>Avoiding run-time errors that are caused by undefined variable etc, this is especially required in an interpreted language like Python.</p>
+</li>
+<li>
+<p>Manage dependencies project uses, so that multiple projects can co-exists on a development machine. Chances are you are collaborating on more than one project which have conflicting dependencies.</p>
+</li>
+<li>
+<p>Produce identical builds across time and developer's platform.</p>
+</li>
+<li>
+<p>Be able to separate a development environment from a production environment, there are certain packages needed only on development and/or build setup but are not required on production setup (eg. unit-testing).</p>
+</li>
+</ol>
+<p>All the issues discussed above have caused unpleasant surprises in a deployed application and it's quite possible to avoid those or at-least substantially decrease the occurrences of such issues.</p>
+<p>Since there are a number of tools out there, which in some combination will prove quite useful, what we discuss below are how some of those tools can be used to address the challenge. First let's look at the problems in little more details</p>
+<h1>Dependencies</h1>
+<p>Every project is likely to have dependencies on some libraries that are developed separately and maintained by someone else. In fact effectively tracking dependencies, can become quite a challenging task. Let's look at some of the challenges -</p>
+<h2>Conflicting Dependencies</h2>
+<p>While Python's standard library is quite extensive, almost always we need a functionality that is better provided by some packages. A very good example is the <a href="http://docs.python-requests.org/en/master/">requests</a> package, which is a great substitute for the Python standard library's <code>httplib</code> or <code>urllib2</code>. It's very likely that you are simultaneously working on two projects where one project works with a specific version of <code>requests</code> (say version-a) and another works with another version of <code>requests</code> (say version-b) and unfortunately they are incompatible. The two code bases are not related to each other, so likely you would want to use both the versions with the respective code base. Python solves this problem using a tool called <code>virtualenv</code>. What <a href="https://virtualenv.pypa.io/en/stable/"><code>virtualenv</code></a> essentially does is creates a self contained Python environment in a single directory and does tricks with Python's system path (<code>sys.path</code>) such that the Python interpreter finds packages and modules from inside this directory. Think of this as a Python equivalent of <code>chroot</code>, loosely speaking. In fact, if a developed Python application is going to be containerized, <code>virtualenv</code> will almost be a required one. So it's always a recommended practice to start a project with it's own <code>virtualenv</code>.</p>
+<p>Key Takeaway : <em>Every project should have it's on <code>virtualenv</code>.</em></p>
+<h2>Transitive Dependencies</h2>
+<p>We have looked at how <code>virtualenv</code> could help us solve the problem of conflicting dependencies on a developer's machine. However, now when we look at an individual project, how do we install the dependencies. One good thing about <code>virtualenv</code> is, when you create a virtual environment, it installs <code>pip</code> Python's recommended package manager inside the virtual environment. So one should always use this <code>pip</code> for installing additional dependencies.</p>
+<p>A small digression here before we look more at dependencies and transitive dependencies. Typically if you are using Linux platform for development, your distribution will also provide the distribution specific versions of Python packages (like <code>rpm</code> or <code>deb</code>) supported by the package manager of your distribution (like <code>yum</code> or <code>apt</code>). Whenever you are developing using Python you should <em>never</em> use these packages - often these packages are outdated, second their dependencies come as distribution specific packages like <code>rpm</code> or <code>deb</code> (and not as pip packages) and they are not so straight forward to use in a virtual environment.</p>
+<p>One of the advantages of using <code>pip</code> is, if the package you are using has dependencies itself, they are also installed recursively till all dependencies are resolved.</p>
+<p>Also, one of the recommended practice is to use your distributions packages for <code>pip</code> and <code>python</code> and then use that <code>pip</code> to install your project's dependencies.</p>
+<p>Key Takeaway : <em>Always use <code>pip</code> to install dependencies in a virtual environment created by <code>virtualenv</code> for the project</em></p>
+<h2>Deterministic Builds (or Build Reproducibility)</h2>
+<p>Once we start with a virtual environment and use <code>pip</code> to install packages, often we have a pretty good starting point for the Project's development. It may not though be enough or always optimal. For example a question one might want to ask is - should the virtual environment itself be maintained inside <code>git</code>? It's not a very bad idea, but probably not a recommended one. A natural question then is how can a team collaborate effectively? One of the ways to solve that problem is by maintaining a <code>requirements.txt</code> file, that lists down your dependencies and their respective versions and instead maintain that file in a <code>git</code> repository. <code>pip</code> allows installing packages listed in a file using a command like <code>pip -r requirements.txt</code>. Pip also allows a command called <code>pip freeze</code> that looks at currently installed packages in a <code>virtualenv</code> and generates a list of packages with their installed version. (Note: strictly speaking pip can also look at packages installed in the standard system path on the machine, but as discussed already, we will typically use <code>pip</code> that <code>virtualenv</code> installs, we are only looking at dependencies installed in a <code>virtualenv</code>.) So something like <code>pip freeze &gt; requirements.txt</code> would help you generate the <code>requirements.txt</code> and then this file can be tracked in <code>git</code>. Someone cloning (or forking) the repository can simply do a <code>pip -r requirements.txt</code> after cloning the repository (and creating the <code>virtualenv</code>.) and would have identical versions of packages installed (well almost - we'd look at a subtle issue and how to fix that later.)</p>
+<p>Key Takeaway : <em>Use a <code>requirements.txt</code> file to track your dependencies and generate it using <code>pip freeze</code>.</em></p>
+<h1>Separate Environments</h1>
+<p>What we have described so far should be 'good enough' when starting a project. However when the scope of the project starts improving, unit tests are added, coding guidelines are to be enforced, there might be more needed to be done than what we have discussed so far. Let's look at some of the challenges. What <code>pip freeze</code> does is it lists down all the packages (with their installed versions) that are installed by pip. But let's consider this - You want to run some unit tests while building a project and you are using tools like <code>nose</code> to do so and have installed it using <code>pip</code>, <code>pip freeze</code> will catch that for you as well. In a development environment you want to run certain sanity checks etc and are using tools like <code>pylint</code> (see below for more about <code>pylint</code>), but may be you don't want those in a production environment. So you want to kind of keep the installed dependencies in a development environment different from those in production environment, tools like <code>pipenv</code> help yo fix that problem. In the next article of this series, we are going to take a closer look at <code>pipenv</code>.</p>
+<h1>Code Quality</h1>
+<p>Often as the size of a team working on a project grows, it is often not sufficient to simply document 'recommended' practices and conventions, there needs to be a way to enforce some. (for instance you might want your code to strictly adhere to <code>pep8</code> and code not conforming to <code>pep8</code> is not admissible). Python also being a weakly typed and interpreted languages, a number of errors show up at the run-time, so it's a better practice to actually use some code linting tools that will analyze your code (often without running it) and highlight potential errors that can be easily fixed during the development itself. In a subsequent post we will take a more detailed look at <code>pylint</code> and how it can be integrated into the development workflow to ensure certain code quality.</p>
+<h1>Summary</h1>
+<p>In this part, we discussed typical challenges in developing a Python project from an ecosystem perspective and provided an overview of some tools that can help address. In summary, following just the three simple practices should start as a good starting point</p>
+<ol>
+<li>
+<p>Every Project should have it's own <code>virtualenv</code>.</p>
+</li>
+<li>
+<p>Always use <code>pip</code> to install dependencies in a virtual environment created by <code>virtualenv</code>.</p>
+</li>
+<li>
+<p>Use <code>requirements.txt</code> file to track your dependencies and generate it using <code>pip freeze</code>.</p>
+</li>
+</ol>
+<p>In remaining parts we would look at how to use <code>pipenv</code> to setup separate Development and Production environments, how to use <code>pylint</code> and integrate it as a <code>git pre-commit hook</code> to enforce certain coding standards and automatically check for errors in Python code without waiting for them to show up at run-time and how a Python project can be containerized.</p></div>
+	
+        <hr>
+
+        <h2>Comments</h2>
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'gabhijit-github-io'; 
+    var disqus_title = 'Python Project Workflows - Part 1';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+        </div>
+
+        <div class="span3">
+
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header">
+                Site
+                </li>
+
+                <li><a href="https://gabhijit.github.io/archives.html">Archives</a>
+                <li><a href="https://gabhijit.github.io/tags.html">Tags</a>
+
+
+
+
+            </ul>
+            </div>
+
+
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header">
+                Categories
+                </li>
+
+                <li><a href="https://gabhijit.github.io/category/linux-networking.html">Linux Networking</a></li>
+                <li><a href="https://gabhijit.github.io/category/oai.html">OAI</a></li>
+                <li><a href="https://gabhijit.github.io/category/python.html">Python</a></li>
+            </ul>
+            </div>
+
+
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header">
+                Links
+                </li>
+
+                <li><a href="http://getpelican.com/">Pelican</a></li>
+            </ul>
+            </div>
+
+
+            <div class="social">
+            <div class="well" style="padding: 8px 0; background-color: #FBFBFB;">
+            <ul class="nav nav-list">
+                <li class="nav-header">
+                Social
+                </li>
+
+                <li><a href="https://github.com/gabhijit">Github</a></li>
+                <li><a href="https://www.linkedin.com/in/amgadgil/">LinkedIn</a></li>
+                <li><a href="https://stackoverflow.com/users/2845044/gabhijit">StackOverflow</a></li>
+            </ul>
+            </div>
+            </div>
+
+        </div>     </div>     </div> 
+<footer>
+<br />
+<p><a href="https://gabhijit.github.io">Abhijit's Blog</a> &copy; Abhijit Gadgil 2018</p>
+</footer>
+
+</div> <!-- /container -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="https://gabhijit.github.io/theme/bootstrap-collapse.js"></script>
+</body>
+</html>
