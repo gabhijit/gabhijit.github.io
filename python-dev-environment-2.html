@@ -57,7 +57,7 @@
     <div class='article'>
         <div class="content-title">
             <h1>Python Project Workflows - Part 2</h1>
-06/05/2018
+14/05/2018
 
 by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html">Abhijit Gadgil</a>
  
@@ -65,21 +65,19 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 
         </div>
 	
-        <div><p>[//] # FIXME : Need to fix the link to draft
-Summary: In the <a href="/drafts/python-dev-environment.html">first post</a>, we looked at what are typical issues in setting up Python project workflows and took an overview of the tools of the trade. In this post, we are going to be looking closely at <code>pipenv</code> a tool for managing Python project dependencies. In particular we are looking at how <code>pipenv</code> will help us solve the problems of reproducible builds and managing dev and production environments properly as described in the post mentioned above.</p>
-<h1>Intended Audience</h1>
+        <div><h1>Intended Audience</h1>
+<p>If you have not read <a href="/python-dev-environment.html">first part</a> of this series, it might be a good idea to start there to understand the issues that we are trying to address here.</p>
 <p>Some background working in Python would be certainly useful. This document tries to provide an overview of the role of <code>requirements.txt</code> and how it is used along with <code>pip</code> and <code>setuptools</code>, but is not a tutorial on <code>requirements.txt</code>.</p>
-<p>To better understand some of the issues we are addressing in this document, having read first part of this tutorial would be quite useful.</p>
 <h1>Introduction</h1>
 <p>As seen in Part 1 of the series of blog, <code>requirements.txt</code> file can be used to track external dependencies of our project. Often, one may not necessarily have a separate <code>requirements.txt</code> file, but the dependencies can be tracked directly in the <code>setup.py</code> if one is using <code>setuptools</code> for building, installing and publishing the project. The way this works is <code>setup</code> function in <code>setuptools</code> takes an argument called <code>install_requires</code> and typically this list is generated from the <code>requirements.txt</code> file above, with something very simple like <code>install_requires=open('requirements.txt', 'r').readlines()</code>. This will make sure whenever we are trying to <code>install</code> the project, these dependencies (and their dependencies) are installed as well.</p>
-<p>One of the challenges with <code>requirements.txt</code>, when using <a href="https://semver.org/">semantic versioning</a> (which is always recommended) is whether to specify exact versions of dependencies (using eg. say <code>requests==2.18.4</code>) or using the versions that are compatible with our Project. While it may be desirable to use latest compatible versions, it might resulting in different builds at different times of the same project (commit as well) to result in using different versions of dependencies and hence the builds are no longer reproducible, so it probably is a good idea to use fixed versions of dependencies and whenever the dependencies are updated, they undergo a proper testing and then a newer version of project can use newer version of dependencies.</p>
+<p>One of the challenges with <code>requirements.txt</code>, when using <a href="https://semver.org/">semantic versioning</a> (which is always recommended) is whether to specify exact versions of dependencies (using eg. say <code>requests==2.18.4</code>) or using the versions that are compatible with our Project. While it may be desirable to use latest compatible versions, it might result in different builds (where the build checksum does not match) at different times of the same project (even for the same commit) using different versions of dependencies and hence the builds are no longer deterministic or reproducible, so it probably is a good idea to use fixed versions of dependencies and whenever the dependencies are updated, they undergo a proper testing and then a newer version of project can use newer version of dependencies.</p>
 <p>As we have seen <code>pip freeze</code> can be used to generate exact version of dependencies installed. However this is still not most ideal, the reason being <code>pip freeze</code> will collect all dependencies (which is good), but won't tell us which dependencies were installed to satisfy which dependencies or in other words, it doesn't show dependency graphs and how they are resolved. This means even 'dev' dependencies are collected by <code>pip freeze</code>, which is something we don't want.</p>
 <p>We might require separate environment for development and separate environment for deployment. Some of the dependencies that were installed during development are often not required in a deployment environment (eg. tools like <code>pylint</code> that are used for code linting, or <code>mock</code>, <code>unittest</code> that are used for unit-testing etc.) Usually it's not a harm to install those in a deployment environment as well, but more software on the production machine means bigger attack surface, which usually is best avoided.</p>
 <p>So how do we solve this issue? In comes <code>pipenv</code>. Next we'll look at some sample use of <code>pipenv</code> and how the problem described above can be addressed and some things to keep in mind.</p>
-<h1>'pipenv' A Quick Overview</h1>
+<h1>A Quick Overview of 'pipenv'</h1>
 <p><a href="https://github.com/pypa/pipenv"><code>pipenv</code></a> is a recommended tool for Python packaging and it tries to bring the features available for packaging in things like <code>npm</code>, <code>cargo</code>, <code>bundler</code> etc. A project's dependencies are provided in a file called <code>Pipfile</code>. <code>pipenv</code> then along with <code>Pipfile</code> and companion <code>Pipfile.lock</code> provides the necessary tooling. A more detailed list of <code>pipenv</code> <a href="https://github.com/pypa/pipenv#-features">features is available here</a>. Also, with <code>pipenv</code>, there is no need to manage <code>virtualenv</code> for the project. It is managed automatically by the <code>pipenv</code>. It's highly recommended to read more about it's documentation above. Just like <code>pip</code>, it's possible to provide dependencies from a VCS or your local file-system. Also, it's quite easy to manage the development environment as most of the <code>pipenv</code> commands support an option called <code>--dev</code>, that is extremely useful. Next we'd take a look at a simple <code>pipenv</code> based workflow that I usually follow.</p>
-<h1><code>pipenv</code> A simple workflow.</h1>
-<p>This section explains how <code>pipenv</code> manages your environment, for a quick usable workflow go directly to <a href="">summary section below</a></p>
+<h1>A Simple workflow for 'pipenv'</h1>
+<p>This section explains how <code>pipenv</code> manages your environment, for a quick usable workflow go directly to <a href="#summary">summary section below</a></p>
 <p>Usually, your project may already have a <code>requirements.txt</code>, so the first step in getting started with <code>pipenv</code> is generating a <code>Pipfile</code>. This can be done as follows</p>
 <div class="highlight"><pre><span></span>gabhijit@dev:~/foo/pipenv-foo$ pipenv install
 Creating a virtualenv <span class="k">for</span> this project…
@@ -263,14 +261,14 @@ You might see a warning as below, but it can be safely ignored -</p>
 
 
 <p>So what we do now is - used the output generated above to populate <code>requirements.txt</code> and <code>dev-requirements.txt</code> respectively.</p>
-<h1>'pipenv' Workflow Summary</h1>
+<h1><a name="summary"></a> Workflow Summary for Pipenv</h1>
 <p>All of this can be summarized as follows (assuming you are starting for a brand new-project) -</p>
 <ol>
 <li>
 <p>Start with <code>pipenv install</code></p>
 </li>
 <li>
-<p>Add necessary project requirements. Read <a href="">here</a> why it is better to give a "*" as a dependency than a fixed version.</p>
+<p>Add necessary project requirements.</p>
 </li>
 <li>
 <p><code>pipenv update</code></p>
