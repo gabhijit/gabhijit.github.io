@@ -58,7 +58,23 @@
 
 
     <div class='article'>
-        <a href="https://gabhijit.github.io/python-dev-environment-2.html"><h2>Python Project Workflows - Part 2 (Pipenv)</h2></a>
+        <a href="/python-project-workflows-3.html"><h2>Python Project Workflows - Part 3 (pylint)</h2></a>
+        <div class= "well small"> 16/05/2018
+
+by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html">Abhijit Gadgil</a>
+ 
+
+
+ </div>
+        <div class="summary"><p>In the <a href="/python-dev-environment.html">first part</a> we looked at a few challenges involved when developing a Python project in a collaborative environment. In the <a href="/python-dev-environment-2.html">second part</a> we looked at how <code>Pipenv</code> addresses some of those issues. In this part of the series we are going to take a closer look at how one can use code linting tools. Specifically we are going to be looking in details at using <code>pylint</code>.</p> <a class="btn btn-info xsmall" href="/python-project-workflows-3.html">read more</a></div>
+    </div>
+
+
+ 
+
+
+    <div class='article'>
+        <a href="/python-project-workflows-2.html"><h2>Python Project Workflows - Part 2 (Pipenv)</h2></a>
         <div class= "well small"> 14/05/2018
 
 by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html">Abhijit Gadgil</a>
@@ -66,7 +82,7 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 
 
  </div>
-        <div class="summary"><p>In the <a href="/python-dev-environment.html">first post</a>, we looked at what are typical issues in setting up Python project workflows and took an overview of the tools of the trade. In this post, we are going to be looking closely at <code>pipenv</code> a tool for managing Python project dependencies. In particular we are looking at how <code>pipenv</code> will help us solve the problems of reproducible builds and managing dev and production environments properly.</p> <a class="btn btn-info xsmall" href="https://gabhijit.github.io/python-dev-environment-2.html">read more</a></div>
+        <div class="summary"><p>In the <a href="/python-dev-environment.html">first post</a>, we looked at what are typical issues in setting up Python project workflows and took an overview of the tools of the trade. In this post, we are going to be looking closely at <code>pipenv</code> a tool for managing Python project dependencies. In particular we are looking at how <code>pipenv</code> will help us solve the problems of reproducible builds and managing dev and production environments properly.</p> <a class="btn btn-info xsmall" href="/python-project-workflows-2.html">read more</a></div>
     </div>
 
 
@@ -74,7 +90,7 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 
 
     <div class='article'>
-        <a href="https://gabhijit.github.io/python-dev-environment.html"><h2>Python Project Workflows - Part 1</h2></a>
+        <a href="/python-project-workflows-1.html"><h2>Python Project Workflows - Part 1</h2></a>
         <div class= "well small"> 08/05/2018
 
 by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html">Abhijit Gadgil</a>
@@ -82,7 +98,7 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 
 
  </div>
-        <div class="summary"><p>In a Python based development, tools like <code>pylint</code>, <code>pipenv</code> and <code>virtualenv</code> become important pieces of your development workflow. In the first part of the series of blog posts, we look at overview of the issues that become important as the scope of the project and size of the team working on project increases. In later posts in these series, we would try to address these issues one by one, we look at starting a project, identifying and resolving dependencies 'correctly', why reproducible builds matter, how to separate development and production environment and eventually how to containerize the application.</p> <a class="btn btn-info xsmall" href="https://gabhijit.github.io/python-dev-environment.html">read more</a></div>
+        <div class="summary"><p>In a Python based development, tools like <code>pylint</code>, <code>pipenv</code> and <code>virtualenv</code> become important pieces of your development workflow. In the first part of the series of blog posts, we look at overview of the issues that become important as the scope of the project and size of the team working on project increases. In later posts in these series, we would try to address these issues one by one, we look at starting a project, identifying and resolving dependencies 'correctly', why reproducible builds matter, how to separate development and production environment and eventually how to containerize the application.</p> <a class="btn btn-info xsmall" href="/python-project-workflows-1.html">read more</a></div>
     </div>
 
 
@@ -90,7 +106,7 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 
 
     <div class='article'>
-        <a href="https://gabhijit.github.io/oai-oaisim-enb-epc-netns.html"><h2>OpenAirInterface with Linux Network Namespaces</h2></a>
+        <a href="/oai-oaisim-enb-epc-netns.html"><h2>OpenAirInterface with Linux Network Namespaces</h2></a>
         <div class= "well small"> 15/03/2018
 
 by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html">Abhijit Gadgil</a>
@@ -98,7 +114,7 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 
 
  </div>
-        <div class="summary"><p><a href="http://www.openairinterface.org/">OpenAirInterface</a> aims to develop open source software solutions for 4G and 5G cellular network, that would run on COTS hardware (typically x86/ARM based CPUs). The project provides an Air Interface Simulator (OAISIM) and implementations of eNodeB and the EPC. OAISIM allows one to test the software implementations of the Network components, without actually having access to the RF part. While there are many tutorials that allow you to connect OAISIM + eNodeB on one machine and connect it with EPC (MME/SGW and PGW) running on another machine, I was not able to find any good tutorial that allowed to connect these devices on the same machine. While, it's quite possible to do so by using two VMs on the same machine, two VMs still looked like sub-optimal as in theory it looked quite possible to do this using Network Namespaces to provide isolations for individual nodes. Further, using network namespaces would allow to containerize this quite easily. Since the development platform I am using is not exactly identical to the one for which documentation is available, I had to do some tweaking to build the components as well. This blog post discusses this in details.</p> <a class="btn btn-info xsmall" href="https://gabhijit.github.io/oai-oaisim-enb-epc-netns.html">read more</a></div>
+        <div class="summary"><p><a href="http://www.openairinterface.org/">OpenAirInterface</a> aims to develop open source software solutions for 4G and 5G cellular network, that would run on COTS hardware (typically x86/ARM based CPUs). The project provides an Air Interface Simulator (OAISIM) and implementations of eNodeB and the EPC. OAISIM allows one to test the software implementations of the Network components, without actually having access to the RF part. While there are many tutorials that allow you to connect OAISIM + eNodeB on one machine and connect it with EPC (MME/SGW and PGW) running on another machine, I was not able to find any good tutorial that allowed to connect these devices on the same machine. While, it's quite possible to do so by using two VMs on the same machine, two VMs still looked like sub-optimal as in theory it looked quite possible to do this using Network Namespaces to provide isolations for individual nodes. Further, using network namespaces would allow to containerize this quite easily. Since the development platform I am using is not exactly identical to the one for which documentation is available, I had to do some tweaking to build the components as well. This blog post discusses this in details.</p> <a class="btn btn-info xsmall" href="/oai-oaisim-enb-epc-netns.html">read more</a></div>
     </div>
 
 
@@ -106,7 +122,7 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 
 
     <div class='article'>
-        <a href="https://gabhijit.github.io/linux-vrf-mpls.html"><h2>Linux VRF with MPLS for L3-VPN</h2></a>
+        <a href="/linux-vrf-mpls.html"><h2>Linux VRF with MPLS for L3-VPN</h2></a>
         <div class= "well small"> 27/02/2018
 
 by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html">Abhijit Gadgil</a>
@@ -114,7 +130,7 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 
 
  </div>
-        <div class="summary"><p>VRF support for Linux was added in kernel 4.5. In the Linux netdev 1.1 conference, there was a talk about this support, which showed one of the use-case as MPLS-VPN. This blog post tries to re-create the setup from demo on a kernel 4.15.</p> <a class="btn btn-info xsmall" href="https://gabhijit.github.io/linux-vrf-mpls.html">read more</a></div>
+        <div class="summary"><p>VRF support for Linux was added in kernel 4.5. In the Linux netdev 1.1 conference, there was a talk about this support, which showed one of the use-case as MPLS-VPN. This blog post tries to re-create the setup from demo on a kernel 4.15.</p> <a class="btn btn-info xsmall" href="/linux-vrf-mpls.html">read more</a></div>
     </div>
 
 
@@ -122,7 +138,7 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 
 
     <div class='article'>
-        <a href="https://gabhijit.github.io/linux-virtual-interfaces.html"><h2>Linux Virtual Interfaces</h2></a>
+        <a href="/linux-virtual-interfaces.html"><h2>Linux Virtual Interfaces</h2></a>
         <div class= "well small"> 23/02/2018
 
 by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html">Abhijit Gadgil</a>
@@ -130,7 +146,7 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 
 
  </div>
-        <div class="summary"><p>Linux supports <code>veth</code> and <code>tun/tap</code> types of virtual interfaces, which are used by VMs, Containers for providing networking. This post summarizes certain findings as a result of experimenting these virtual interfaces along with Linux's Ethernet bridge.</p> <a class="btn btn-info xsmall" href="https://gabhijit.github.io/linux-virtual-interfaces.html">read more</a></div>
+        <div class="summary"><p>Linux supports <code>veth</code> and <code>tun/tap</code> types of virtual interfaces, which are used by VMs, Containers for providing networking. This post summarizes certain findings as a result of experimenting these virtual interfaces along with Linux's Ethernet bridge.</p> <a class="btn btn-info xsmall" href="/linux-virtual-interfaces.html">read more</a></div>
     </div>
 
 
@@ -138,7 +154,7 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 
 
     <div class='article'>
-        <a href="https://gabhijit.github.io/python-profiling-context-manager.html"><h2>Using Python Context Manager for Profiling</h2></a>
+        <a href="/python-profiling-context-manager.html"><h2>Using Python Context Manager for Profiling</h2></a>
         <div class= "well small"> 24/08/2017
 
 by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html">Abhijit Gadgil</a>
@@ -146,7 +162,7 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 
 
  </div>
-        <div class="summary"><p>Profiling your code to identify hotspots or potential performance issues can prove quite useful. Python provides a <code>cProfile</code> package in the standard library provides this functionality for deterministic profiling. Usually, one might want to have an ability to turn profiling on and off at the run-time if possible. We explore a mechanism based on context managers in Python (Python <code>with</code> syntax) to be able to do so.</p> <a class="btn btn-info xsmall" href="https://gabhijit.github.io/python-profiling-context-manager.html">read more</a></div>
+        <div class="summary"><p>Profiling your code to identify hotspots or potential performance issues can prove quite useful. Python provides a <code>cProfile</code> package in the standard library provides this functionality for deterministic profiling. Usually, one might want to have an ability to turn profiling on and off at the run-time if possible. We explore a mechanism based on context managers in Python (Python <code>with</code> syntax) to be able to do so.</p> <a class="btn btn-info xsmall" href="/python-profiling-context-manager.html">read more</a></div>
     </div>
 
 
@@ -154,7 +170,7 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 
 
     <div class='article'>
-        <a href="https://gabhijit.github.io/vector-operations-are-fast-right.html"><h2>So Vector Operations Are Fast, Right?</h2></a>
+        <a href="/vector-operations-are-fast-right.html"><h2>So Vector Operations Are Fast, Right?</h2></a>
         <div class= "well small"> 07/08/2017
 
 by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html">Abhijit Gadgil</a>
@@ -162,7 +178,7 @@ by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html
 
 
  </div>
-        <div class="summary"><p>Recently, for one of the projects we are working on, I was looking at processing data from Pandas panel. I wanted to find out certain <code>items</code> in a Panel based on certain criteria on the <code>minor axis</code>. I worked with two flavors and the findings for different data-sets are quite interesting. Something that would definitely qualify as an interesting learning. We discuss, how profiling can be successfully used to explain certain Performance behavior, that often looks counter-intuitive.</p> <a class="btn btn-info xsmall" href="https://gabhijit.github.io/vector-operations-are-fast-right.html">read more</a></div>
+        <div class="summary"><p>Recently, for one of the projects we are working on, I was looking at processing data from Pandas panel. I wanted to find out certain <code>items</code> in a Panel based on certain criteria on the <code>minor axis</code>. I worked with two flavors and the findings for different data-sets are quite interesting. Something that would definitely qualify as an interesting learning. We discuss, how profiling can be successfully used to explain certain Performance behavior, that often looks counter-intuitive.</p> <a class="btn btn-info xsmall" href="/vector-operations-are-fast-right.html">read more</a></div>
     </div>
 
 <div class="pagination">

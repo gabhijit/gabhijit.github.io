@@ -287,17 +287,17 @@ You might see a warning as below, but it can be safely ignored -</p>
 </li>
 </ol>
 <h1>Few More Points</h1>
-<ol>
+<ul>
 <li>VCS repositories - <code>pipenv</code> allows to use dependencies from the VCS directly (something that <code>pip</code> supports as well.) The exact syntax for this is as follows - In the <code>Pipfile</code> mention the dependency as follows</li>
-</ol>
+</ul>
 <div class="highlight"><pre><span></span>tickerplot = { git = &quot;https://github.com/gabhijit/tickerplot.git&quot;, ref=&quot;v0.0.4&quot;, editable=&quot;True&quot; }
 </pre></div>
 
 
 <p>Note: here it is required to give <code>editable=True</code> or else <code>pipenv lock -r</code> won't list the subsequent dependencies of the dependencies taken from the <code>git</code> repository above.</p>
-<ol>
+<ul>
 <li>Starting with existing <code>requirements.txt</code> file - If there's an already exisiting <code>requirements.txt</code> file, <code>Pipfile</code> will pick up the exact versions from the <code>requirements.txt</code> and you won't be able to <code>upgrade</code> to newer versions without fixing this first.</li>
-</ol></div>
+</ul></div>
 	
         <hr>
 
