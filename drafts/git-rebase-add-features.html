@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Abhijit's Blog - Tags</title>
+    <title>Abhijit's Blog - Some Nice 'git rebase' and 'git add' features</title>
     <meta name="description" content="">
     <meta name="author" content="Abhijit Gadgil">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -54,113 +54,42 @@
     <div class="row">
 
         <div class="span9">
-<ul class="tagcloud">
-        <li class="tag-4">
-            <a href="https://gabhijit.github.io/tag/pandas.html">
-            pandas
-            </a>
-        </li>
-        <li class="tag-4">
-            <a href="https://gabhijit.github.io/tag/python-logging.html">
-            python logging
-            </a>
-        </li>
-        <li class="tag-4">
-            <a href="https://gabhijit.github.io/tag/python-with-statement.html">
-            python-with-statement
-            </a>
-        </li>
-        <li class="tag-4">
-            <a href="https://gabhijit.github.io/tag/tap.html">
-            tap
-            </a>
-        </li>
-        <li class="tag-2">
-            <a href="https://gabhijit.github.io/tag/netns.html">
-            netns
-            </a>
-        </li>
-        <li class="tag-2">
-            <a href="https://gabhijit.github.io/tag/pipenv.html">
-            pipenv
-            </a>
-        </li>
-        <li class="tag-4">
-            <a href="https://gabhijit.github.io/tag/enodeb.html">
-            eNodeB
-            </a>
-        </li>
-        <li class="tag-4">
-            <a href="https://gabhijit.github.io/tag/epc.html">
-            EPC
-            </a>
-        </li>
-        <li class="tag-4">
-            <a href="https://gabhijit.github.io/tag/vrf.html">
-            VRF
-            </a>
-        </li>
-        <li class="tag-4">
-            <a href="https://gabhijit.github.io/tag/tun.html">
-            tun
-            </a>
-        </li>
-        <li class="tag-4">
-            <a href="https://gabhijit.github.io/tag/oai.html">
-            OAI
-            </a>
-        </li>
-        <li class="tag-4">
-            <a href="https://gabhijit.github.io/tag/mpls.html">
-            MPLS
-            </a>
-        </li>
-        <li class="tag-4">
-            <a href="https://gabhijit.github.io/tag/veth.html">
-            veth
-            </a>
-        </li>
-        <li class="tag-2">
-            <a href="https://gabhijit.github.io/tag/virtualenv.html">
-            virtualenv
-            </a>
-        </li>
-        <li class="tag-2">
-            <a href="https://gabhijit.github.io/tag/pip.html">
-            pip
-            </a>
-        </li>
-        <li class="tag-4">
-            <a href="https://gabhijit.github.io/tag/numpy.html">
-            numpy
-            </a>
-        </li>
-        <li class="tag-1">
-            <a href="https://gabhijit.github.io/tag/pylint.html">
-            pylint
-            </a>
-        </li>
-        <li class="tag-4">
-            <a href="https://gabhijit.github.io/tag/lte.html">
-            LTE
-            </a>
-        </li>
-        <li class="tag-4">
-            <a href="https://gabhijit.github.io/tag/profiling.html">
-            profiling
-            </a>
-        </li>
-        <li class="tag-1">
-            <a href="https://gabhijit.github.io/tag/python.html">
-            Python
-            </a>
-        </li>
-        <li class="tag-1">
-            <a href="https://gabhijit.github.io/tag/linux.html">
-            Linux
-            </a>
-        </li>
-</ul>
+    <div class='article'>
+        <div class="content-title">
+            <h1>Some Nice 'git rebase' and 'git add' features</h1>
+27/05/2018
+
+by <a class="url fn" href="https://gabhijit.github.io/author/abhijit-gadgil.html">Abhijit Gadgil</a>
+ 
+
+
+        </div>
+	
+        <div><h1>Choosing a Subset Of Changes in a File</h1>
+<p>It quite often happens with me, while working on a feature, looking at the code, you I want to 'fix something' that's not directly related to the exact part of the feature that I am working on, but still important to be done for committing. For instance, recently, I forgot to implement a method in a class (Class 1) and realized while I started implementing another Class (Class 2). Now ideally What you want in a history is 'changes related to an implementation of a class say Class 1 above be together and ideally in one commit (at-least when pushed to the <code>origin</code>). A normal practice while committing work is <code>git commmit -a</code>, which will basically 'stage' all modified files and commit them. What if one wants to add only 'a part of a file' in a commit while leaving the other modifications intact but uncommitted. <code>git add --patch</code> serves this purpose. It opens an <code>interactive session</code> and asks you several choices about what you want to to with different <code>hunks</code> that it has identified, which one can add, ignore and so on. But what if there is a 'hunk' that git has identified but you want to only take 'part' of that hunk and leave other 'part' untouched? The above interactive session supports an option called 'split' ('s') that can be used to split a given hunk and then the interactive session continues as before. This becomes very handy.</p>
+<p>To pick and choose which changes in a file to use in a commit - simply do</p>
+<p><code>git add --patch</code> and then continue the interactive Session</p>
+<h1>Merging More than one Commits together</h1>
+<p>Before we want to publish our changes to origin (or create a PR), it's often a good idea to 'rebase' our feature branch (with the origin branch) as well as combine our multiple commits in the feature branch into a single (or a few meaningful) commit(s). A very interesting feature of <code>git rebase -i</code> is you can <code>pick</code> and <code>squash</code> commits, but not just that, it's possible to 're-organize' the order of the commits themselves. This is quite an interesting feature, that allows the history of the repository to be kept meaningful and consistent.</p>
+<p>To re-organize your work in a feature branch -</p>
+<p><code>git rebase -i</code> and then 'pick' and 'squash' commits if necessary. You can move the lines of 'pick' in the file. (Keep in mind if you 'delete' the commit, during rebase those changes will be lost). A lot of this is 'documented' (in fact the commit message documents this very well, often we tend to ignore.)</p></div>
+	
+        <hr>
+
+        <h2>Comments</h2>
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'gabhijit-github-io'; 
+    var disqus_title = 'Some Nice 'git rebase' and 'git add' features';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
         </div>
 
         <div class="span3">
