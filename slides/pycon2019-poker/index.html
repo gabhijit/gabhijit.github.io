@@ -29,8 +29,9 @@
 
 
 <section>
-          <h4> Call, Raise or Fold - Running Poker Simulations in Python</h4>
-          <h4> by Abhijit Gadgil</h4>
+	<h3> Call, Raise or Fold<h3>
+			<h4> Running Poker Simulations in Python</h4>
+      <p> by Abhijit Gadgil</p>
 
 </section>
  <section data-markdown data-separator="^---" data-separator-vertical="^--">
@@ -41,22 +42,24 @@
  3. Simulating a Poker Game <!-- .element: class="fragment" -->
  4. Statistics of a large number of games. <!-- .element: class="fragment" -->
 ---
-### Game of Poker - Quick Intro
---
+## Game of Poker - Quick Intro
+
 There are many variations of Poker games, we'll look at most common variant called Texas hold'em.
 
 Poker is a card game involving multiple players -
 
-1. Each pair is dealt two cards initially.
-2. Then there are cards called community cards, total of 5. Those cards are revealed as follows -
+1. Each player is dealt two cards initially.
+2. Then there are cards called community cards, total of 5. Community cards are available to all players.
+--
+
+3. Those cards are revealed as follows -
   - Three community cards are revealed first (called 'flop')
   - Then one more community card is revealed (called 'turn')
   - Finally last community card is revealed (called 'river')
---
-3. At each of the above rounds, players bet, in a round-robin manner.
-4. Another player can 'Call' a player's bet or 'Raise' a player's bet or 'Fold'.
-5. At each stage, all players' bets should be equal.
-6. Player with highest bet or the best hand wins.
+4. At each of the above rounds, players bet, in a round-robin manner.
+5. Another player can 'Call' a player's bet or 'Raise' a player's bet or 'Fold'.
+6. At each stage, all players' bets should be equal.
+7. Player with highest bet or the best hand wins.
 
 ---
 ### Poker Hands - Overview
@@ -72,7 +75,9 @@ Reference: [Poker Probability](https://en.wikipedia.org/wiki/Poker_probability#F
 
 We'll first start with representing a card, a deck and hands.
 --
-Representing Cards (ideas borrwoed from [Peter Norvig's code](http://norvig.com))
+### Representing Cards
+
+Ideas borrwoed from [Peter Norvig's code](http://norvig.com))
 
  * Each Card has got a 'Rank' and a 'Suite'.
  * Ranks from 1 (for Ace) to 13 for (King) but actually we use 2 to 14 (for Ace)
@@ -81,6 +86,8 @@ Representing Cards (ideas borrwoed from [Peter Norvig's code](http://norvig.com)
  * Also, for every 'Rank', we'll assign a value (some notion of Score of that card).
 
 --
+### Card Deck
+
 Thus our Deck now will look like -
 
 ```python
@@ -99,6 +106,8 @@ def deck(shuffled=False):
 
 ```
 --
+### Poker Hands
+
 Poker Hands are just - A list of 5 cards - Some Examples
 
 ```python
@@ -113,7 +122,7 @@ high_card = ['AS', 'QC', '9D', '7C', '4H']
 
 ```
 ---
-#### Comparing Poker Hands
+### Comparing Poker Hands
 
 We'll start by defining a class called 'PokerHand' and then use operator overloading for comparison.
 
@@ -249,7 +258,7 @@ Finally the comparison operator
 So far we have looked at comparing Poker hands, now we'll look at simulating Poker Games.
 
 ---
-#### Simulating a Single Poker Game
+### Simulating a Single Poker Game
 
 1. A poker game consists of a Table, with given number of Players
 2. Each player is initially dealt two cards, we call it 'deal'
@@ -340,14 +349,14 @@ So a single game would look like -
 
 ```
 ---
-#### Simulating a large number of games
+### Simulating a large number of games
 
 1. We are interested in finding out whether there are any interesting statistics in Poker
 2. We just need a driver for the above code.
 --
-#### Some results from simulations
+### Some results from simulations
 ---
-References:
+### References
 
 1. Texas Hold'em Poker
 2. Poker Probability
