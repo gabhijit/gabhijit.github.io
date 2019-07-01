@@ -37,12 +37,24 @@
  <section data-markdown data-separator="^---" data-separator-vertical="^--">
                        <script type="text/template">
 ### Overview Of the talk
+ 1. Why this Problem?
  1. An introduction to Game of Poker <!-- .element: class="fragment" -->
  2. Types of Poker Hands and Ranking them <!-- .element: class="fragment" -->
  3. Simulating a Poker Game <!-- .element: class="fragment" -->
  4. Statistics of a large number of games. <!-- .element: class="fragment" -->
 ---
-## Game of Poker - Quick Intro
+### Why This Problem?
+
+
+This is a good candidate for demonstrating how to 'Think In Python'.
+
+--
+Thinking in a language is about built-ins, core constructs and standard library.
+--
+Ranking Poker hands becomes quite a challenging problem, without `set` like abstraction.
+
+---
+### Game of Poker - Quick Intro
 
 There are many variations of Poker games, we'll look at most common variant called Texas hold'em.
 
@@ -77,7 +89,7 @@ We'll first start with representing a card, a deck and hands.
 --
 ### Representing Cards
 
-Ideas borrwoed from [Peter Norvig's code](http://norvig.com))
+Ideas borrowed from [Peter Norvig's code](http://norvig.com)
 
  * Each Card has got a 'Rank' and a 'Suite'.
  * Ranks from 1 (for Ace) to 13 for (King) but actually we use 2 to 14 (for Ace)
@@ -126,7 +138,7 @@ high_card = ['AS', 'QC', '9D', '7C', '4H']
 
 We'll start by defining a class called 'PokerHand' and then use operator overloading for comparison.
 
-Strictly, there's no need to 'force' to use a class here, but this comes in handy
+Strictly, there's no need to 'force' to use a class here, but this comes in handy when we simulate a game.
 
 --
 ```python
@@ -158,6 +170,7 @@ len(set(suits)) == 1
 ```python
 len(set(ranks)) == 2
 ```
+--
 3. If it's a 'Straight' difference between max rank and minimum rank is 4
 ```python
 max(ranks) - min(ranks) == 4
@@ -361,8 +374,6 @@ So a single game would look like -
 1. Texas Hold'em Poker
 2. Poker Probability
 3. Code Above
----
-
                     </script>
  </section>
 
