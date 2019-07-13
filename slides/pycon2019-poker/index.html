@@ -226,10 +226,25 @@ class PokerHand(BasePokerHand):
     ...
 ```
 --
+
 Once we find out type, of a hand, we'll find the score of a hand and then compare the hands using their scores.
 
-But we also need to break ties when scores are same, where this `ordered` comes into play.
+```python
+    def score(self):
+        score = 1 << 0
+        if self.four_of_a_kind(): score <<= 7
+        if self.full_house(): score <<= 6
+        if self.flush(): score <<= 5
+        if self.straight(): score <<= 4
+        if self.three_of_a_kind(): score <<= 3
+        if self.two_pairs(): score <<= 2
+        if self.pair(): score <<= 1
+
+        return score
+
+```
 --
+But we also need to break ties when scores are same, where this `ordered` comes into play.
 Closer look at 'Ordered'
 
 `ordered` is a list of tuples of the type (rank, count) sorted, by count first and rank later.
