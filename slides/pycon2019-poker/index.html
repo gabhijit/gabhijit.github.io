@@ -36,6 +36,15 @@
 </section>
  <section data-markdown data-separator="^---" data-separator-vertical="^--">
                        <script type="text/template">
+### About Me
+
+1. Work as indepedent consultant.
+2. Mostly programming in Python for fun as well as for work.
+3. Run a consultancy firm, hyphenOs Software Labs.
+4. Like Python for quickly trying out ideas
+
+---
+
 ### Overview Of the talk
  1. Why this Problem?
  1. An introduction to Game of Poker <!-- .element: class="fragment" -->
@@ -61,7 +70,7 @@ There are many variations of Poker games, we'll look at most common variant call
 Poker is a card game involving multiple players -
 
 1. Each player is dealt two cards initially.
-2. Then there are cards called community cards, total of 5. Community cards are available to all players.
+2. Then there are cards called community cards, total of 5 Community cards are available to all players.
 --
 
 3. Those cards are revealed as follows -
@@ -78,13 +87,17 @@ Poker is a card game involving multiple players -
 
 1. Each Poker hand is made up of 5 cards.
 2. Using any combination of Player's own cards or community cards (most variations differ in this aspect)
-3. The hands are ranked based on their odds, one with lower odds is ranked highest
+3. The hands are ranked based on their odds, one with lower odds is ranked higher
 
 Reference: [Poker Probability](https://en.wikipedia.org/wiki/Poker_probability#Frequency_of_5-card_poker_hands)
 --
 ![Poker Hands](https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/17579/versions/1/screenshot.jpg "Poker Hands")
 
 Credits: mathworks.com (Through Image Search)
+--
+![Poker Probability](/slides/pycon2019-poker/poker_probability.png "Poker Probability")
+
+Credits: Wikipedia
 ---
 ### Okay Some Python now!
 
@@ -298,6 +311,9 @@ So far we have looked at comparing Poker hands, now we'll look at simulating Pok
    - Number of Players
    - Each Player's initial hand (we call it MiniPokerHand)
    - And actions like 'flop', 'turn', 'river'
+4. We are going to look at some built-ins and standard library modules
+   - `sorted` built-in and how to use custom functions to rank
+   - `itertools` modules and `combinations` generator
 --
 
 We keep some additional state for a game, this state includes
@@ -386,13 +402,145 @@ So a single game would look like -
 2. We just need a driver for the above code.
 --
 ### Some results from simulations
+
+Can we develop statistics from looking at simulations of a large number of games?
+
+Are they a function of number of players?
+--
+```
+Simulating for 2 players
+
+1062 of 5000 Games where Ace High during Deal is a winner,
+in which 3911 games had an ace high hand.
+Conditional probability(0.2715)
+
+1419 of 5000 Games where Flush during Deal is a winner,
+in which 4386 games had a flush hand.
+Conditional Probability. (0.3235)
+
+504 of 5000 Games where Pairs during Deal is a winner,
+in which 1937 games had a pair hand.
+Conditional Probablity (0.2602)
+```
+--
+```
+Simulating for 3 players
+
+1036 of 5000 Games where Ace High during Deal is a winner,
+in which 3929 games had an ace high hand.
+Conditional probability(0.2637)
+
+1524 of 5000 Games where Flush during Deal is a winner,
+in which 4440 games had a flush hand.
+Conditional Probability. (0.3432)
+
+503 of 5000 Games where Pairs during Deal is a winner,
+in which 1919 games had a pair hand.
+Conditional Probablity (0.2621)
+```
+--
+```
+Simulating for 4 players
+
+1031 of 5000 Games where Ace High during Deal is a winner,
+in which 3889 games had an ace high hand.
+Conditional probability(0.2651)
+
+1488 of 5000 Games where Flush during Deal is a winner,
+in which 4363 games had a flush hand.
+Conditional Probability. (0.3410)
+518 of 5000 Games where Pairs during Deal is a winner,
+in which 1936 games had a pair hand.
+Conditional Probablity (0.2676)
+```
+--
+```
+Simulating for 5 players
+
+963 of 5000 Games where Ace High during Deal is a winner,
+in which 3860 games had an ace high hand.
+Conditional probability(0.2495)
+
+1445 of 5000 Games where Flush during Deal is a winner,
+in which 4440 games had a flush hand.
+Conditional Probability. (0.3255)
+
+500 of 5000 Games where Pairs during Deal is a winner,
+in which 1909 games had a pair hand.
+Conditional Probablity (0.2619)
+```
+--
+```
+Simulating for 6 players
+
+1005 of 5000 Games where Ace High during Deal is a winner,
+in which 3872 games had an ace high hand.
+Conditional probability(0.2596)
+
+1453 of 5000 Games where Flush during Deal is a winner,
+in which 4412 games had a flush hand.
+Conditional Probability. (0.3293)
+
+520 of 5000 Games where Pairs during Deal is a winner,
+in which 1867 games had a pair hand.
+Conditional Probablity (0.2785)
+```
+--
+```
+Simulating for 7 players
+
+1010 of 5000 Games where Ace High during Deal is a winner,
+in which 3944 games had an ace high hand.
+Conditional probability(0.2561)
+
+1466 of 5000 Games where Flush during Deal is a winner,
+in which 4411 games had a flush hand.
+Conditional Probability. (0.3324)
+
+531 of 5000 Games where Pairs during Deal is a winner,
+in which 1948 games had a pair hand.
+Conditional Probablity (0.2726)
+```
+---
+Actually interesting statistics are conditional probabilities above -
+
+1. Flush during initial deal is a winner both in absolute and conditional terms.
+2. Pair winners appear to be half that of Ace high winners in absolute terms,
+3. However if we look at conditional probabilities, they appear to be comparable.
+
+--
+The above statistics can be used along with other table level statistics, like -
+1. Is Flop winner the final winner?
+2. Is Turn winner the final winner?
+
+--
+
+Some interesting observations -
+
+1. The statistics don't appear to change as per number of players in the table (A bit counter intuitive)
+2. Conditional probabilities tell, given you have a type of hand during deal, what are your odds of winning a hand
+
+--
+
+Some thoughts on how these stats can be used -
+
+1. You can determine strategies, where at each stage, you can determine - what's a risk involved while placing bets?
+2. You can refine that as game progresses - Baysian thinking (Initial Mini Flush, Possible Flop Winner etc.)
+
 ---
 ### References
 
-1. Texas Hold'em Poker
-2. Poker Probability
-3. Code Above
+1. Texas Hold'em Poker (https://en.wikipedia.org/wiki/Texas_hold_'em)
+2. Poker Probability (https://en.wikipedia.org/wiki/Poker_probability)
+3. Code Above (https://github.com/gabhijit/pycon)
+
+---
+### Thanks
+
+Feel free to get in touch `gabhijit@hyphenos.io`
+---
                     </script>
+
  </section>
 
       </div>
