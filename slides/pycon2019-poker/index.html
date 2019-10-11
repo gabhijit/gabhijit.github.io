@@ -299,19 +299,25 @@ Finally the comparison operator
 
 ```
 --
-So far we have looked at comparing Poker hands, now we'll look at simulating Poker Games.
+So far we have looked at comparing Poker hands, now we will look at simulating Poker Games.
 
 ---
 ### Simulating a Single Poker Game
 
 1. A poker game consists of a Table, with given number of Players
-2. Each player is initially dealt two cards, we call it 'deal'
-3. To simulate a Poker Game, we need -
+2. Then there are different actions, initial two cards, we call a 'deal'
+3. Then there are other actions like 'flop', 'turn', 'river' as new
+   cards are revealed.
+--
+
+1. To simulate a Poker Game, we need -
    - Shuffled Deck
    - Number of Players
-   - Each Player's initial hand (we call it MiniPokerHand)
+   - Each Player's initial hand (we call it `MiniPokerHand`)
    - And actions like 'flop', 'turn', 'river'
-4. We are going to look at some built-ins and standard library modules
+2. We'll start with a class called `PokerTable` (actually it can be better called
+	 as `PokerGame`.)
+3. We are going to look at some built-ins and standard library modules
    - `sorted` built-in and how to use custom functions to rank
    - `itertools` modules and `combinations` generator
 --
@@ -380,7 +386,11 @@ So a single game would look like -
         self.flop()
         self.rank_players()
         self._flop_winner = self._table_ranks[0]
-
+...
+```
+--
+```
+...
         self.burn_card()
         self.turn()
         self.rank_players()
@@ -391,9 +401,7 @@ So a single game would look like -
         self.rank_players()
         self._river_winner = self._table_ranks[0]
 
-        self._pot_winner = self._river_winner
-
-
+        self._game_winner = self._river_winner
 ```
 ---
 ### Simulating a large number of games
