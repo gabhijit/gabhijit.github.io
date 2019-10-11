@@ -38,7 +38,7 @@
                        <script type="text/template">
 ### About Me
 
-1. Work as indepedent consultant.
+1. Work as independent consultant.
 2. Mostly programming in Python for fun as well as for work.
 3. Run a consultancy firm, hyphenOs Software Labs.
 4. Like Python for quickly trying out ideas
@@ -65,18 +65,18 @@ Ranking Poker hands becomes quite a challenging problem, without `set` like abst
 ---
 ### Game of Poker - Quick Intro
 
-There are many variations of Poker games, we'll look at most common variant called Texas hold'em.
+There are many variations of Poker games, we'll look at the most common variant called Texas hold'em.
 
 Poker is a card game involving multiple players -
 
 1. Each player is dealt two cards initially.
-2. Then there are cards called community cards, total of 5 Community cards are available to all players.
+2. Then there are cards called community cards, a total of 5 Community cards are available to all players.
 --
 
 3. Those cards are revealed as follows -
   - Three community cards are revealed first (called 'flop')
   - Then one more community card is revealed (called 'turn')
-  - Finally last community card is revealed (called 'river')
+  - Finally, last community card is revealed (called 'river')
 4. At each of the above rounds, players bet, in a round-robin manner.
 5. Another player can 'Call' a player's bet or 'Raise' a player's bet or 'Fold'.
 6. At each stage, all players' bets should be equal.
@@ -174,7 +174,7 @@ class BasePokerHand:
 ```
 --
 
-We'll need to determine 'type' of a hand.
+We'll need to determine the 'type' of a hand.
 
 Some ways in which we can determine 'type' of a hand -
 
@@ -243,7 +243,7 @@ class PokerHand(BasePokerHand):
 ```
 --
 
-Once we find out type, of a hand, we'll find the score of a hand and then compare the hands using their scores.
+Once we find out the type of a hand, we'll find the score of a hand and then compare the hands using their scores.
 
 ```python
     def score(self):
@@ -514,7 +514,7 @@ Actually interesting statistics are conditional probabilities above -
 
 1. Flush during initial deal is a winner both in absolute and conditional terms.
 2. Pair winners appear to be half that of Ace high winners in absolute terms,
-3. However if we look at conditional probabilities, they appear to be comparable.
+3. However, if we look at conditional probabilities, they appear to be comparable.
 
 --
 The above statistics can be used along with other table level statistics, like -
@@ -533,7 +533,7 @@ Some interesting observations -
 Some thoughts on how these stats can be used -
 
 1. You can determine strategies, where at each stage, you can determine - what's a risk involved while placing bets?
-2. You can refine that as game progresses - Baysian thinking (Initial Mini Flush, Possible Flop Winner etc.)
+2. You can refine that as game progresses - Bayesian thinking (Initial Mini Flush, Possible Flop Winner etc.)
 
 ---
 ### References
